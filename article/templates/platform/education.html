@@ -1,0 +1,36 @@
+{% extends 'prometheus.html' %}
+{% load googlecharts %}
+
+{% block data %}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Розподіл за освітою
+                </div>
+
+                <div class="panel-body">
+                    <div id="education"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% googlecharts %}
+    {% data content.education "out_data2" %}
+        {% col "string" "Name" %}"{{ val }}"{% endcol %}
+        {% col "number" "Зареєстровано" %}{{ val }}{% endcol %}
+    {% enddata %}
+    {% options "out_options2" %}
+        kind: "ColumnChart",
+        options: {
+            width: 800,
+            height: 500
+        }
+    {% endoptions %}
+
+    {% graph "education" "out_data2" "out_options2" %}
+
+{% endgooglecharts %}
+
+{% endblock %}

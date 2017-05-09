@@ -1,0 +1,62 @@
+{% extends 'course.html'  %}
+{% load googlecharts %}
+
+{% block data %}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Віковий розподіл
+                </div>
+
+                <div class="panel-body">
+                    <div id="out"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Відсоток проходження
+                </div>
+
+                <div class="panel-body">
+                    <div id="age_percent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% googlecharts %}
+    {% data content.age "out_data" %}
+        {% col "string" "Name" %}"{{ val }}"{% endcol %}
+        {% col "number" "Зареєструвались" %}{{ val }}{% endcol %}
+        {% col "number" "Пройшли" %}{{ val }}{% endcol %}
+    {% enddata %}
+    {% options "out_options" %}
+        kind: "ColumnChart",
+        options: {
+            height: 500
+        }
+    {% endoptions %}
+    {% graph "out" "out_data" "out_options" %}
+
+        {% data content.age_percent "out_data2" %}
+            {% col "string" "Name" %}"{{ val }}"{% endcol %}
+            {% col "number" "Пройшли, %" %}{{ val }}{% endcol %}
+        {% enddata %}
+        {% options "out_options2" %}
+            kind: "ColumnChart",
+            options: {
+                height: 500
+            }
+        {% endoptions %}
+        {% graph "age_percent" "out_data2" "out_options2" %}
+
+
+{% endgooglecharts %}
+
+{% endblock %}

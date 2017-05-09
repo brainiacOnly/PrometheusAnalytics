@@ -1,0 +1,51 @@
+{% extends 'index.html' %}
+{% load staticfiles %}
+{% load activator %}
+
+{% block body %}
+
+    <div id="wrap" style="min-height: 70%;">
+        <div id="left">
+            <ul id="menu" class="collapse">
+                <li><div class="gap"></div></li>
+                <li class="panel {% activator request 'age' %}">
+                    <a href="/platform/age/">
+                        Вік
+                    </a>
+                </li>
+
+                <li class="panel {% activator request 'education' %}">
+                    <a href="/platform/education/">
+                        Освіта
+                    </a>
+                </li>
+
+                <li class="panel {% activator request 'gender' %}">
+                    <a href="/platform/gender/">
+                        Стать
+                    </a>
+                </li>
+
+                <li class="panel {% activator request 'registration' %}">
+                    <a href="/course/underconstruction/">
+                        Реєстрація
+                    </a>
+                </li>
+                {% if is_staff or is_teacher %}
+                <li class="panel {% activator request 'popularity' %}">
+                    <a href="/course/underconstruction/">
+                        Популярність курсів
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <div id="content" >
+            <div class="inner" style="min-height: 700px;">
+               {% block data %}{% endblock %}
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

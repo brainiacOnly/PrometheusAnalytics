@@ -1,0 +1,63 @@
+{% extends 'index.html' %}
+{% load staticfiles %}
+{% load googlecharts %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-lg-6" style="padding-left: 55px; padding-top: 40px;padding-right: 20px;padding-bottom: 40px;">
+            <div class="panel panel-default">
+                <div class="panel-heading">Інформація, вказана при реєстрації</div>
+                <div class="panel-body">
+                    <dl class="dl-horizontal">
+                        <dt>Ім’я</dt>
+                        <dd>{{ content.name }}</dd>
+                        <dt>Email</dt>
+                        <dd>{{ content.email }}</dd>
+                        <dt>Стать</dt>
+                        <dd>{{ content.gender }}</dd>
+                        <dt>Рік народження</dt>
+                        <dd>{{ content.year }}</dd>
+                        <dt>Освіта</dt>
+                        <dd>{{ content.education }}</dd>
+                        <dt>Цілі</dt>
+                        <dd>{{ content.aim }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6" style="padding-left: 20px; padding-top: 40px;padding-right: 55px;padding-bottom: 40px;">
+            <div class="panel panel-default">
+                <div class="panel-heading">Проходження курсів</div>
+                <div class="panel-body" id="out">
+                    <ul class="list-group">
+                        {% for course in content.courses %}
+                            <li class="list-group-item">
+                            {{ course.0 }}
+                            <span class="pull-right text-muted small">
+                                <em>
+                                    {{ course.1 }}%
+                                </em>
+                            </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% googlecharts %}
+                        {% data content.courses "out_data2" %}
+                            {% col "string" "Курс" %}"{{ val }}"{% endcol %}
+                            {% col "number" "Відсоток проходження" %}{{ val }}{% endcol %}
+                        {% enddata %}
+                        {% options "out_options2" %}
+                            kind: "BarChart",
+                            options: {
+                                width: 500,
+                                height: 400
+                            }
+                        {% endoptions %}
+                        {% graph "out2" "out_data2" "out_options2" %}
+                {% endgooglecharts %}
+{% endblock %}

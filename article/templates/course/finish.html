@@ -1,0 +1,36 @@
+{% extends 'course.html' %}
+{% load googlecharts %}
+
+{% block data %}
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Проходження тестів
+                </div>
+
+                <div class="panel-body">
+                    <div id="out"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% googlecharts %}
+    {% data content.data "out_data" %}
+        {% col "string" "Name" %}"{{ val }}"{% endcol %}
+        {% col "number" "Value" %}{{ val }}{% endcol %}
+    {% enddata %}
+    {% options "out_options" %}
+        kind: "SteppedAreaChart",
+        options: {
+            height: 500,
+            vAxis: {title: 'Кількість користувачів'},
+            isStacked: true
+        }
+    {% endoptions %}
+    {% graph "out" "out_data" "out_options" %}
+{% endgooglecharts %}
+{% endblock %}
+

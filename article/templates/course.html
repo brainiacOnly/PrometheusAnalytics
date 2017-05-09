@@ -1,0 +1,90 @@
+{% extends 'index.html' %}
+{% load staticfiles %}
+{% load activator %}
+
+{% block body %}
+    <div id="wrap">
+        <div id="left">
+            <div class="media user-media well-small">
+                <br>
+                <div class="media-body">
+                    <form role="form" action="/course/set_course/" method="post">
+                              {% csrf_token %}
+                            <div class="form-group">
+                              <label for="sel1">Назва курсу:</label>
+                              <select class="form-control" id="sel1" name="course_name" onchange="this.form.submit()">
+                                  {% for c in course_names %}
+                                    {% if c == course %}
+                                        <option selected="selected">{{ c }}</option>
+                                    {% else %}
+                                        <option>{{ c }}</option>
+                                    {% endif %}
+                                  {% endfor %}
+                              </select>
+                                <input type="hidden" name="path" value="{{ path }}">
+                            </div>
+                    </form>
+                </div>
+                <br>
+            </div>
+            <ul id="menu" class="collapse">
+
+
+                <li class="panel {% activator request 'main' %}">
+                    <a href="/course/main/">
+                        Сертифікати
+                    </a>
+                </li>
+
+                <li class="panel {% activator request 'age' %}">
+                    <a href="/course/age/">
+                        Вік
+                    </a>
+                </li>
+
+                <li class="panel {% activator request 'education' %}">
+                    <a href="/course/education/">
+                        Освіта
+                    </a>
+                </li>
+
+                <li class="panel {% activator request 'gender' %}">
+                    <a href="/course/gender/">
+                        Стать
+                    </a>
+                </li>
+
+                <li class="panel {% activator request 'registration' %}">
+                    <a href="/course/underconstruction/">
+                        Реєстрація
+                    </a>
+                </li>
+                {% if is_staff or is_teacher %}
+                <li class="panel {% activator request 'finish' %} {% activator request 'quesion' %} {% activator request 'answer' %}">
+                    <a href="#" data-parent="#menu" data-toggle="collapse" class="accordion-toggle" data-target="#component-nav">
+                        <i class="icon-tasks"> </i> Результати
+
+                        <span class="pull-right">
+                          <i class="icon-angle-left"></i>
+                        </span>
+                    </a>
+                    <ul class="collapse" id="component-nav">
+
+                        <li class=""><a href="/course/finish/"><i class="icon-angle-right"></i> Завершення </a></li>
+                         <li class=""><a href="icon.html"><i class="icon-angle-right"></i> Питання </a></li>
+                        <li class=""><a href="progress.html"><i class="icon-angle-right"></i> Відповіді </a></li>
+                    </ul>
+                </li>
+                {% endif %}
+
+            </ul>
+        </div>
+
+        <div id="content" >
+            <div class="inner" style="min-height: 700px;">
+               {% block data %}{% endblock %}
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
