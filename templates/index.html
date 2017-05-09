@@ -1,0 +1,145 @@
+{% load staticfiles %}
+{% load split %}
+{% load activator %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Prometheus.Analytics</title>
+    <link href="{% static "static/css/bootstrap.min.css"%}" rel="stylesheet">
+    <link href="{% static "static/css/font-awesome.min.css"%}" rel="stylesheet">
+    <link href="{% static "static/css/prettyPhoto.css"%}" rel="stylesheet">
+    <link href="{% static "static/css/animate.css"%}" rel="stylesheet">
+    <link href="{% static "static/css/main.css"%}" rel="stylesheet">
+    <!--[if lt IE 9]>
+    <script src="{% static "static/js/html5shiv.js"%}"></script>
+    <script src="{% static "static/js/respond.min.js"%}"></script>
+    <![endif]-->       
+    <link rel="shortcut icon" href="{% static "static/images/ico/favicon.ico"%}">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{% static "static/images/ico/apple-touch-icon-144-precomposed.png"%}">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{% static "static/images/ico/apple-touch-icon-114-precomposed.png"%}">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{% static "static/images/ico/apple-touch-icon-72-precomposed.png"%}">
+    <link rel="apple-touch-icon-precomposed" href="{% static "static/images/ico/apple-touch-icon-57-precomposed.png"%}">
+
+
+
+    <!--[if IE]>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <![endif]-->
+    <!-- GLOBAL STYLES -->
+    <link rel="stylesheet" href="{% static "static/assets/plugins/bootstrap/css/bootstrap.css" %}" />
+    <link rel="stylesheet" href="{% static "static/assets/css/main.css" %}"/>
+    <link rel="stylesheet" href="{% static "static/assets/css/theme.css" %}"/>
+    <link rel="stylesheet" href="{% static "static/assets/css/MoneAdmin.css" %}"/>
+    <link rel="stylesheet" href="{% static "static/assets/plugins/Font-Awesome/css/font-awesome.css" %}"/>
+    <!--END GLOBAL STYLES -->
+
+    <!-- PAGE LEVEL STYLES -->
+    <link href="{% static "static/assets/css/layout2.css" %}" rel="stylesheet" />
+       <link href="{% static "static/assets/plugins/flot/examples/examples.css" %}" rel="stylesheet" />
+       <link rel="stylesheet" href="{% static "static/assets/plugins/timeline/timeline.css"  %}"/>
+    <!-- END PAGE LEVEL  STYLES -->
+     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+</head><!--/head-->
+<body>
+    <header class="navbar navbar-inverse navbar-fixed-top wet-asphalt" style="padding: 10px;" role="banner">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <!--<a class="navbar-brand" href="index.html"><img src="{% static "static/images/logo.png" %}" alt="logo"></a>-->
+                <a href="index.html"><h2><img src="{% static "static/images/66390.png" %}" style="height: 40px;" /> Prometheus.Analytics</h2></a>
+                <!--<div class="gap"></div>-->
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="{% activator request '' %}"><a href="/">Головна</a></li>
+                    {% if username %}
+                        <li class="{% activator request 'schedule' %}"><a href="/schedule/">План навчання</a></li>
+                    {% endif %}
+                    <li class="dropdown {% activator request 'course' %} {% activator request 'platform' %}">
+                        <a href="#"  class="dropdown-toggle" data-toggle="dropdown">Візуалізація<i class="icon-angle-down"></i></a>
+                        <ul class="dropdown-menu drodown-tasks">
+                            {% if username %}
+                                <li><a href="/course/main/">Курс</a></li>
+                            {% endif %}
+                                <li><a href="/platform/age/">Prometheus</a></li>
+                        </ul>
+                    </li>
+                    <li class="{% activator request 'about' %}"><a href="/about/">Про проект</a></li>
+                    {% if username %}
+                        <li class="{% activator request 'profile' %}"><a href="/profile/">Профіль {{ username }}</a></li>
+                    {% endif %}
+                    <li>
+                        {% if username %}
+                            <a href="/auth/logout/" class="btn btn-danger" style="color: white;">Вийти</a>
+                        {% else %}
+                            <a href="/auth/login/" class="btn btn-danger" style="color: white;">Увійти</a>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header><!--/header-->
+
+    {% if request.path %}
+    <section id="title" class="emerald">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h1>{{ banner.tilte }}</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ul class="breadcrumb pull-right">
+                        {% for  i in banner.links %}
+                            <li><a href="{{ i.0 }}">{{ i.1 }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section><!--/#title-->
+
+    {% endif %}
+
+    {% block login %} {% endblock %}
+    {% block body %} {% endblock %}
+    <footer id="footer" class="midnight-blue">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    &copy; 2013 <a target="_blank" href="http://shapebootstrap.net/" title="Free Twitter Bootstrap WordPress Themes and HTML templates">ShapeBootstrap</a>. All Rights Reserved.
+                </div>
+                <div class="col-sm-6">
+                    <ul class="pull-right">
+                        <li><a id="gototop" class="gototop" href="#">На гору <i class="icon-chevron-up"></i></a></li><!--#gototop-->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer><!--/#footer-->
+
+    <script src="{% static "static/js/jquery.js" %}"></script>
+    <script src="{% static "static/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "static/js/jquery.prettyPhoto.js" %}"></script>
+    <script src="{% static "static/js/main.js" %}"></script>
+
+    <!-- GLOBAL SCRIPTS -->
+    <script src="{% static "static/assets/plugins/jquery-2.0.3.min.js" %}"></script>
+     <script src="{% static "static/assets/plugins/modernizr-2.6.2-respond-1.1.0.min.js" %}"></script>
+    <!-- END GLOBAL SCRIPTS -->
+
+</body>
+</html>
