@@ -1,0 +1,61 @@
+{% extends 'index.html' %}
+{% load staticfiles  %}
+
+{% block login %}
+    <section id="title" class="emerald">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h1>Вхід</h1>
+                    <p>Введіть свій логін і пароль, які ви використовуєте для Prometheus</p>
+                </div>
+                <div class="col-sm-6">
+                    <ul class="breadcrumb pull-right">
+                        <li><a href="/">Головна</a></li>
+                        <li class="active">Вхід</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section><!--/#title-->
+
+    <section id="registration" class="container" style="min-height: 60%;">
+        <form class="center" role="form" action="/auth/login/" method="post">
+            {% csrf_token %}
+            <fieldset class="registration-form">
+                <div class="form-group">
+                    <input type="text" id="username" name="username" placeholder="логін" class="form-control">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" name="password" placeholder="Пароль" class="form-control">
+                </div>
+                <div class="form-group">
+                    {% if login_error %}
+                        <label class="error">{{ login_error }}</label>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <input type="submit" class="btn btn-success btn-md btn-block" value="Вхід">
+                </div>
+            </fieldset>
+        </form>
+    </section><!--/#registration-->
+
+{% endblock %}
+
+<!--
+ <div class="large-offset-3 large-6 columns">
+        <form action="/auth/login" method="post">
+            {% csrf_token %}
+            <label for="username">Имя пользователя</label>
+            <input type="text" name="username" id="username">
+            <label for="password">Пароль</label>
+            <input type="password" name="password" id="password">
+            {% if login_error %}
+                <label class="error">{{ login_error }}</label>
+            {% endif %}
+            <input type="submit" class="button" value="Войти">
+            <div class="label round secondary"><a href="/auth/register/">Регистрация</a></div>
+        </form>
+    </div>
+ -->
