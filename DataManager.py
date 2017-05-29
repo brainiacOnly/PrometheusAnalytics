@@ -225,19 +225,8 @@ class DataManager():
         return plot_data.values.tolist()
 
     def gender_all(self):
-        """
-        users = self.get_users()
-        registered = users[['user_id','name','gender','year_of_birth','level_of_education']]
-
-        registeredGroups =registered.groupby('gender').count().ix[:,0]
-
-        plot_data = pd.concat([pd.DataFrame(registeredGroups.index,index=registeredGroups.index),registeredGroups],axis=1).fillna(0)
-        plot_data.columns = ['name','value']
-        plot_data = plot_data[plot_data.name != 'o']
-        """
-        plot_data = pd.read_sql("select gender, count(*) from auth_userprofile group by gender",con=self.__connection)
-        plot_data.gender = plot_data.gender.apply(self.map_gender)
-
+        plot_data = pd.read_sql("select IF(au.gender = '' OR au.gender is null, 'o', au.gender) as person_gender, count(*) from auth_userprofile au group by person_gender",con=self.__connection)
+        plot_data.person_gender = plot_data.person_gender.apply(self.map_gender)
         return plot_data.values.tolist()
 
     def __getChildren(self,id,modules):
@@ -363,8 +352,8 @@ class DataManager():
             return u'Чоловік'
         elif id == 'f':
             return u'Жінка'
-        elif id == 'o':
-            return u'Інше'
+        elif id == 'o' or id == None or len(id) == 0:
+            return u'Інше / Не вказано'
         else:
             return id
 
