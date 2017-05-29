@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from django.conf import settings
-import time
+from time import time
 import pandas as pd
 import datetime
 import numpy as np
@@ -220,13 +220,6 @@ class DataManager():
         return plot_data.values.tolist()
 
     def education_all(self):
-        """
-        users = self.get_users()
-        registered = users[['user_id','name','gender','year_of_birth','level_of_education']]
-
-        registeredGroups =registered.groupby('level_of_education').count().ix[:,0]
-        plot_data = pd.concat([pd.DataFrame(registeredGroups.index,index=registeredGroups.index),registeredGroups],axis=1,keys=['name','values']).fillna(0)
-        """
         plot_data = pd.read_sql("select level_of_education, count(*) from auth_userprofile group by level_of_education",con=self.__connection)
         plot_data.level_of_education = plot_data.level_of_education.apply(self.map_educaiton)
         return plot_data.values.tolist()
