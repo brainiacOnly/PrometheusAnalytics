@@ -4,7 +4,7 @@ from django.template import *
 from django.shortcuts import render_to_response
 from django.core.context_processors import csrf
 from django.contrib.auth.decorators import login_required
-
+import  time
 from ContentManager import ContentManager
 from article.views import getUserData
 

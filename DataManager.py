@@ -51,12 +51,14 @@ class DataManager():
         return result
 
     def main(self,course_name):
+        print ' in main db'
         cur = self.__connection.cursor()
         cur.execute("select count(*) from certificates_generatedcertificate where status = 'downloadable' and course_id = '%s'" % course_name)
         downloadable = cur.fetchone()[0]
         cur.execute("select count(*) from certificates_generatedcertificate where status != 'downloadable' and course_id = '%s'" % course_name)
         notPassed = cur.fetchone()[0]
 
+        print '{0} - downloadable, {1} - notPassed'.format(downloadable, notPassed)
         #certificates = self.get_certificates()
         #certificates = certificates[certificates.course_id == course_name]
         #downloadable = len(certificates[certificates.status == 'downloadable'])
@@ -407,26 +409,29 @@ class DataManager():
         aim = auth_userprofile[11]
         return name,email,gender,year,education,aim
 
+    def getAllCourseNames(self):
+        credentials = Credential.GetMongoSettings()
+        client = MongoClient(credentials.Address, credentials.Port)
+        modules = client.edxapp.modulestore
+        result = modules.find({"_id.category": "course"},{"_id":1,"metadata.display_name":1})
+        return {'{0}/{1}/{2}'.format(i['_id']['org'],i['_id']['course'],i['_id']['name']) : i['metadata']['display_name'] for i in result}
+
     def getCourseName(self,course_id):
         credentials = Credential.GetMongoSettings()
         client = MongoClient(credentials.Address, credentials.Port)
         modules = client.edxapp.modulestore
         org, course, name = course_id.split('/')
-        print modules
         result = modules.find_one({"$and":[{"_id.category":"course"},{"_id.org":org},{"_id.course":course},{"_id.name":name}]})
-        print result
         return result['metadata']['display_name']
 
     def getCoursesResult(self,username):
-        cur = self.__connection.cursor()
-        cur.execute("select * from auth_user where username = '%s'" % username)
-        auth_user = cur.fetchone()
-        id = auth_user[0]
-        enrolment = pd.read_sql("select course_id from student_courseenrollment where user_id = %d" % id,con = self.__connection)
-        cert = pd.read_sql("select grade, course_id from certificates_generatedcertificate where user_id = %d" % id,con = self.__connection)
-        cert.grade = cert.grade.apply(lambda x: int(float(x) * 100))
-        courses = pd.merge(enrolment,cert,on='course_id',how='left').fillna(0)
-        courses.course_id = courses.course_id.apply(lambda x: self.getCourseName(x))
-        courses.grade = courses.grade.apply(lambda x: int(x))
+        sql = "select ce.course_id, gc.grade from auth_user au " + \
+		                        "join student_courseenrollment ce " + \
+			                        "on au.id = ce.user_id and au.username = '{0}' ".format(username) + \
+		                        "left join certificates_generatedcertificate gc " + \
+			                        "on ce.course_id = gc.course_id and ce.user_id = gc.user_id"
+        courses = pd.read_sql(sql,con = self.__connection).fillna(0)
+        courses.grade = courses.grade.apply(lambda x: int(float(str(x)) * 100))
+        allCourses = self.getAllCourseNames()
+        courses.course_id = courses.course_id.apply(lambda x: allCourses[x])
         return courses[['course_id','grade']].values
-

@@ -8,7 +8,7 @@ from django.shortcuts import render_to_response, redirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.context_processors import csrf
 from django.contrib import auth
-
+from time import time
 from article.models import Article, Comments
 from forms import CommentForm
 from ContentManager import ContentManager
@@ -83,9 +83,10 @@ def about(request):
 
 def getUserData(request):
     args = {}
-    args['username'] = auth.get_user(request).username
-    args['is_teacher'] = auth.get_user(request).is_active
-    args['is_staff'] = auth.get_user(request).is_staff
+    user = auth.get_user(request)
+    args['username'] = user.username
+    args['is_teacher'] = user.is_active
+    args['is_staff'] = user.is_staff
     return args
 
 @login_required(login_url='/auth/login/')
@@ -96,7 +97,6 @@ def profile(request):
     content = ContentManager()
     view_name, args['content'] = content.profile(args['username'])
     args['banner'] = {'tilte':u'Ваш профіль','links':[['/',u'Головна'],['#',u'Профіль']]}
-
     return render_to_response(view_name,args,context_instance=RequestContext(request))
 
 @login_required(login_url='/auth/login/')
