@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from DataManager import DataManager
 from ScheduleCalculator import ScheduleCalculator
+from time import time
 
 class ContentManager():
     def __init__(self,cname = None):

@@ -206,36 +206,17 @@ class DataManager():
         return plot_data.values.tolist()
 
     def age_all(self):
-        """
-        users = self.get_users()
-        registered = users[['user_id','name','gender','year_of_birth','level_of_education']]
-        registered = registered.rename(columns = {'year_of_birth':'Age'})
-        now = datetime.datetime.now().year
-        registered.Age = registered.Age.apply(lambda x: now - x)
+        sql = "select 'Вік не вказано',  count(*) from auth_userprofile where year_of_birth is NULL " + \
+                "union " + \
+                "select 'До 20',  count(*) from auth_userprofile where year(curdate()) - year_of_birth < 20 ";
+        for i in range(0, 6):
+            begin, end = 20 + i * 5, 20 + (i + 1) * 5
+            sql += "union " + \
+                   "select '{0}-{1}', count(*) from auth_userprofile WHERE YEAR( CURDATE( ) ) - year_of_birth >= {0} and YEAR( CURDATE( ) ) - year_of_birth < {1} ".format(begin, end)
 
-        notsetAge = registered[registered.Age.isnull()]
-        withAge = registered[registered.Age.notnull()]
-
-        registeredGroups = pd.Series([len(notsetAge)],index=['without age'])
-        registeredGroups.set_value('below 20',len(withAge[withAge.Age < 20]))
-        """
-        cur = self.__connection.cursor()
-        cur.execute("select count(*) from auth_userprofile where year_of_birth is NULL")
-        registeredGroups = pd.Series([cur.fetchone()[0]],index=['without age'])
-
-        cur.execute("select count(*) from auth_userprofile WHERE YEAR( CURDATE( ) ) - year_of_birth < 20")
-        registeredGroups.set_value(u'До 20',cur.fetchone()[0])
-
-        for i in range(0,6):
-            begin, end = 20+i*5, 20+(i+1)*5
-            cur.execute("select count(*) from auth_userprofile WHERE YEAR( CURDATE( ) ) - year_of_birth >= {0} and YEAR( CURDATE( ) ) - year_of_birth < {1}".format(begin,end))
-            registeredGroups.set_value(str(begin) + '-' + str(end-1),cur.fetchone()[0])
-
-        cur.execute("select count(*) from auth_userprofile WHERE YEAR( CURDATE( ) ) - year_of_birth >= 50")
-        registeredGroups.set_value(u'50 і більше',cur.fetchone()[0])
-
-        plot_data = pd.concat([pd.DataFrame(registeredGroups.index,index=registeredGroups.index),registeredGroups],axis=1,keys=['name','passed'])
-
+        sql += "union " + \
+                "select '50 і більше',  count(*) from auth_userprofile where year(curdate()) - year_of_birth >= 50"
+        plot_data = pd.read_sql(sql, con=self.__connection)
         return plot_data.values.tolist()
 
     def education_all(self):
