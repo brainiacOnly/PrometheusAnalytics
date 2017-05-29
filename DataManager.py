@@ -51,18 +51,12 @@ class DataManager():
         return result
 
     def main(self,course_name):
-        print ' in main db'
         cur = self.__connection.cursor()
         cur.execute("select count(*) from certificates_generatedcertificate where status = 'downloadable' and course_id = '%s'" % course_name)
         downloadable = cur.fetchone()[0]
         cur.execute("select count(*) from certificates_generatedcertificate where status != 'downloadable' and course_id = '%s'" % course_name)
         notPassed = cur.fetchone()[0]
 
-        print '{0} - downloadable, {1} - notPassed'.format(downloadable, notPassed)
-        #certificates = self.get_certificates()
-        #certificates = certificates[certificates.course_id == course_name]
-        #downloadable = len(certificates[certificates.status == 'downloadable'])
-        #notPassed = len(certificates[certificates.status != 'downloadable'])
         return [[u'Пройшли',downloadable],[u'Не пройшли',notPassed]]
 
     def age(self, course_name):
