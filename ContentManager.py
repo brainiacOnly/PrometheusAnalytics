@@ -41,7 +41,6 @@ class ContentManager():
         content = {'page':u'Розподіл за освітою'}
         with DataManager() as dm:
             content['education'], content['education_percent'] = dm.education(self.course_name)
-        print 'education done!'
         return 'course/education.html',content
 
     def __gender(self):

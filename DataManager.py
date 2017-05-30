@@ -88,39 +88,26 @@ class DataManager():
         return plot_data.values,percent_plot_data.values
 
     def education(self, course_name):
-        """
-        certificates = self.get_certificates()
-        users = self.get_users()
-        cert = certificates[['user_id','grade','course_id','status','name','created_date']]
-        cert = cert[cert.course_id == course_name]
-        users = users[['user_id','name','gender','year_of_birth','level_of_education']]
-        registered = pd.merge(cert,users,how='inner',on='user_id').fillna('missed')
-        certified = registered[registered.status == 'downloadable']
+        registeredCroups = pd.read_sql("SELECT IF(u.level_of_education = '' OR u.level_of_education is null, 'other', u.level_of_education) as name, COUNT( * ) as count FROM  auth_userprofile u JOIN certificates_generatedcertificate c ON u.user_id = c.user_id and c.course_id = '%s' group by name" % course_name,con=self.__connection)
+        certifiedCroups = pd.read_sql("SELECT IF(u.level_of_education = '' OR u.level_of_education is null, 'other', u.level_of_education) as name, COUNT( * ) as count FROM  auth_userprofile u JOIN certificates_generatedcertificate c ON u.user_id = c.user_id and c.course_id = '%s' and c.status = 'downloadable' group by name" % course_name,con=self.__connection)
+        certifiedCroups = self.ConsolidateNames(registeredCroups, certifiedCroups)
 
-        registeredGroups =registered.groupby('level_of_education').count().ix[:,0]
-        certifiedGroups = certified.groupby('level_of_education').count().ix[:,0].apply(lambda x: int(x))
-
-        plot_data = pd.concat([registeredGroups,certifiedGroups],axis=1,keys=['registered','passed']).fillna(0)
-        plot_data['name'] = plot_data.index
-        plot_data = plot_data[['name','registered','passed']]
-        plot_data.passed = plot_data.passed.apply(lambda x: int(x))
-
-        percent_plot_data = pd.concat([pd.Series(plot_data.index,index=plot_data.index), (plot_data.passed / plot_data.registered * 100).apply(lambda x: int(round(x)))],axis=1,keys=['index','percent'])
-        """
-        registeredCroups = pd.read_sql("SELECT level_of_education, COUNT( * ) FROM  auth_userprofile u JOIN certificates_generatedcertificate c ON u.user_id = c.user_id and c.course_id = '%s' group by u.level_of_education" % course_name,con=self.__connection)
-        certifiedCroups = pd.read_sql("SELECT level_of_education, COUNT( * ) FROM  auth_userprofile u JOIN certificates_generatedcertificate c ON u.user_id = c.user_id and c.course_id = '%s' and c.status = 'downloadable' group by u.level_of_education" % course_name,con=self.__connection)
-
-        plot_data = registeredCroups
-        plot_data.columns = ['name','registered']
-        plot_data['passed'] = certifiedCroups['COUNT( * )']
-        plot_data = plot_data.fillna(0)
+        plot_data = pd.merge(registeredCroups, certifiedCroups, on=['name'])
+        plot_data.columns = ['name', 'registered','passed']
         plot_data.passed = plot_data.passed.apply(lambda x: int(round(x)))
         plot_data.name = plot_data.name.apply(self.map_educaiton)
-        percent_plot_data = pd.concat([plot_data.name, (plot_data.passed / plot_data.registered * 100)],axis=1,keys=['name','percent']).fillna(0)
+        percent_plot_data = pd.concat([plot_data.name, (plot_data.passed.astype(float) / plot_data.registered * 100)],axis=1,keys=['name','percent']).fillna(0)
         percent_plot_data.percent = percent_plot_data.percent.apply(lambda x: int(round(x)))
         percent_plot_data.name = percent_plot_data.name.apply(self.map_educaiton)
-
         return plot_data.values, percent_plot_data.values
+
+    def ConsolidateNames(self, registered, certified):
+        if len(registered) == len(certified):
+            return certified
+        certifiedNames = certified['name'].values.tolist()
+        registeredNames = registered['name'].values.tolist()
+        lostNames = map(lambda x: [x,0],filter(lambda x: x not in certifiedNames,registeredNames))
+        return certified.append(pd.DataFrame(lostNames, columns=certified.columns), ignore_index=True)
 
     def gender(self,course_name):
         """
