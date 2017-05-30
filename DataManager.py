@@ -25,14 +25,11 @@ class DataManager():
 
     def studentmodule(self,course_id, module_type):
         result = pd.read_sql("SELECT module_id, student_id as user_id, grade, max_grade, course_id, created, modified from courseware_studentmodule where course_id = '{0}' and module_type = '{1}'".format(course_id, module_type),con=self.__connection)
-        print 'studentmodule was executed. The result contains %d rows' % len(result)
         return result
 
     def users(self):
         sql = "SELECT user_id, gender, year_of_birth, level_of_education from auth_userprofile"
-        print "users execution [%s]" % sql
         result = pd.read_sql(sql, con=self.__connection)
-        print 'users(auth_userprofile table) was executed. The result contains %d rows' % len(result)
         return result
 
     def certificates(self, course_id = "", status = ""):
@@ -122,14 +119,7 @@ class DataManager():
         return plot_data.values,plot_data[['name','registered']].values.tolist(),plot_data[['name','passed']].values
 
     def finish(self,course_name):
-
-        #sm = {'KPI/Algorithms101/2015_Spring':self.get_algorithms(),'KPI/Programming101/2015_T1':self.get_programming(),'KNU/101/2014_T2':self.get_history(),'NAUKMA/101/2014_T2':self.get_finman()}[course_name]
-        problems = self.studentmodule(course_name, 'problem')
-        a = problems.groupby('module_id').count().ix[:,0]
-        b = problems.groupby('module_id').apply(lambda x: x.created.min())
-        finishers = pd.concat([a,b],axis=1,keys=['num','date']).sort('date').num
-        plot_data = pd.concat([pd.DataFrame(finishers.index,index=finishers.index),finishers],axis=1,keys=['name','passed'])
-
+        plot_data = pd.read_sql("SELECT module_id, count(*) as amount, min(created) as created_date from courseware_studentmodule where course_id = '{0}' and module_type = 'problem' group by module_id order by created_date".format(course_name), con=self.__connection)
         return plot_data.values.tolist()
 
     def age_all(self):
