@@ -110,25 +110,6 @@ class DataManager():
         return certified.append(pd.DataFrame(lostNames, columns=certified.columns), ignore_index=True)
 
     def gender(self,course_name):
-        """
-        certificates = self.get_certificates()
-        users = self.get_users()
-        cert = certificates[['user_id','grade','course_id','status','name','created_date']]
-        cert = cert[cert.course_id == course_name]
-        users = users[['user_id','name','gender','year_of_birth','level_of_education']]
-        registered = pd.merge(cert,users,how='inner',on='user_id').dropna(subset=['gender'])
-        certified = registered[registered.status == 'downloadable']
-
-        registeredGroups =registered.groupby('gender').count().ix[:,0]
-        certifiedGroups = certified.groupby('gender').count().ix[:,0]
-
-        plot_data = pd.concat([registeredGroups,certifiedGroups],axis=1,keys=['registered','passed'])
-        plot_data['name'] = plot_data.index
-        plot_data = plot_data[plot_data.name != 'o']
-        plot_data.passed = plot_data.passed.apply(lambda x: int(x))
-
-        plot_data = plot_data[['name','registered','passed']]
-        """
         registeredCroups = pd.read_sql("SELECT gender as name, COUNT( * ) as registered FROM  auth_userprofile u JOIN certificates_generatedcertificate c ON u.user_id = c.user_id and c.course_id = '%s' group by u.gender" % course_name,con=self.__connection)
         certifiedCroups = pd.read_sql("SELECT gender as name, COUNT( * ) as passed FROM  auth_userprofile u JOIN certificates_generatedcertificate c ON u.user_id = c.user_id and c.course_id = '%s' and c.status = 'downloadable' group by u.gender" % course_name,con=self.__connection)
         registeredCroups = registeredCroups[registeredCroups.name.isin(['f','m','o'])]
