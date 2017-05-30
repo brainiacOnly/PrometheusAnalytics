@@ -60,66 +60,31 @@ class DataManager():
         return [[u'Пройшли',downloadable],[u'Не пройшли',notPassed]]
 
     def age(self, course_name):
-        """
-        certificates = self.get_certificates()
-        users = self.get_users()
-        cert = certificates[['user_id','grade','course_id','status','name','created_date']]
-        cert = cert[cert.course_id == course_name]
-        users = users[['user_id','name','gender','year_of_birth','level_of_education']]
-        registered = pd.merge(cert,users,how='inner',on='user_id')
-        registered['create_year'] = registered.created_date.apply(lambda x: time.strptime(x,'%Y-%m-%d %H:%M:%S').tm_year)
-        registered = registered.rename(columns = {'year_of_birth':'Age'})
-        registered.Age = registered.create_year - registered.Age
-        certified = registered[registered.status == 'downloadable']
+        reristeredYears = pd.read_sql("select u.year_of_birth FROM auth_userprofile u JOIN student_courseenrollment c on u.user_id = c.user_id WHERE c.course_id = '{0}'".format(course_name), con=self.__connection)
+        certifiedYears = pd.read_sql("select u.year_of_birth FROM auth_userprofile u JOIN certificates_generatedcertificate c on u.user_id = c.user_id WHERE c.status =  'downloadable' AND c.course_id = '{0}'".format(course_name), con=self.__connection)
 
-        notsetAge = registered[registered.Age.isnull()]
-        withAge = registered[registered.Age.notnull()]
-        certNoAge = certified[certified.Age.isnull()]
-        certAge = certified[certified.Age.notnul    l()]
-
-        registeredGroups = pd.Series([len(notsetAge)],index=['without age'])
-        certifiedGroups = pd.Series([len(certNoAge)],index=['without age'])
-        registeredGroups.set_value('below 20',len(withAge[withAge.Age < 20]))
-        certifiedGroups.set_value('below 20',len(certAge[certAge.Age < 20]))
+        registeredGroups = pd.Series(len(reristeredYears[reristeredYears.year_of_birth.isnull()]), index=[u'Вік не вказано'])
+        certifiedGroups = pd.Series(len(certifiedYears[certifiedYears.year_of_birth.isnull()]), index=[u'Вік не вказано'])
+        currentYear = datetime.datetime.now().year
+        registeredGroups.set_value(u'До 20', len(reristeredYears[ currentYear - reristeredYears.year_of_birth < 20]))
+        certifiedGroups.set_value(u'До 20', len(certifiedYears[currentYear - certifiedYears.year_of_birth < 20]))
 
         for i in range(0,6):
             begin, end = 20+i*5, 20+(i+1)*5
-            registeredGroups.set_value(str(begin) + '-' + str(end-1),len(withAge.Age[withAge.Age >= begin ][withAge.Age < end]))
-            certifiedGroups.set_value(str(begin) + '-' + str(end-1),len(certAge.Age[certAge.Age >= begin ][certAge.Age < end]))
+            registeredGroups.set_value(str(begin) + '-' + str(end - 1), len(reristeredYears[(
+                                                                                            currentYear - reristeredYears.year_of_birth >= begin) & (
+                                                                                            currentYear - reristeredYears.year_of_birth < end)]))
+            certifiedGroups.set_value(str(begin) + '-' + str(end - 1), len(certifiedYears[(
+                                                                                            currentYear - certifiedYears.year_of_birth >= begin) & (
+                                                                                            currentYear - certifiedYears.year_of_birth < end)]))
 
-
-        registeredGroups.set_value('50 and higer',len(withAge[withAge.Age >= 50]))
-        certifiedGroups.set_value('50 and higer',len(certAge[certAge.Age >= 50]))
-        plot_data = pd.concat([registeredGroups,certifiedGroups],axis=1,keys=['registered','passed'])
-        plot_data['name'] = plot_data.index
-        plot_data = plot_data[['name','registered','passed']]
-        """
-        cur = self.__connection.cursor()
-        cur.execute("SELECT COUNT( * ) FROM  auth_userprofile u JOIN certificates_generatedcertificate c ON u.user_id = c.user_id WHERE year_of_birth is NULL and c.course_id = '%s'" % course_name)
-        registeredGroups = pd.Series([cur.fetchone()[0]],index=['without age'])
-        cur.execute("SELECT COUNT( * ) FROM  auth_userprofile u JOIN certificates_generatedcertificate c ON u.user_id = c.user_id WHERE year_of_birth is NULL AND c.status =  'downloadable' and c.course_id = '%s'" % course_name)
-        certifiedGroups = pd.Series([cur.fetchone()[0]],index=['without age'])
-
-        cur.execute("SELECT COUNT( * ) FROM  auth_userprofile u JOIN certificates_generatedcertificate c ON u.user_id = c.user_id WHERE YEAR( CURDATE( ) ) - year_of_birth < 20 and c.course_id = '%s'" % course_name)
-        registeredGroups.set_value(u'До 20',cur.fetchone()[0])
-        cur.execute("SELECT COUNT( * ) FROM  auth_userprofile u JOIN certificates_generatedcertificate c ON u.user_id = c.user_id WHERE YEAR( CURDATE( ) ) - year_of_birth < 20 AND c.status =  'downloadable' and c.course_id = '%s'" % course_name)
-        certifiedGroups.set_value(u'До 20',cur.fetchone()[0])
-
-        for i in range(0,6):
-            begin, end = 20+i*5, 20+(i+1)*5
-            cur.execute("SELECT COUNT( * ) FROM  auth_userprofile u JOIN certificates_generatedcertificate c ON u.user_id = c.user_id WHERE YEAR( CURDATE( ) ) - year_of_birth >= {0} and YEAR( CURDATE( ) ) - year_of_birth < {1} and c.course_id = '{2}'".format(begin,end,course_name))
-            registeredGroups.set_value(str(begin) + '-' + str(end-1),cur.fetchone()[0])
-            cur.execute("SELECT COUNT( * ) FROM  auth_userprofile u JOIN certificates_generatedcertificate c ON u.user_id = c.user_id WHERE YEAR( CURDATE( ) ) - year_of_birth >= {0} and YEAR( CURDATE( ) ) - year_of_birth < {1} and c.course_id = '{2}' AND c.status =  'downloadable'".format(begin,end,course_name))
-            certifiedGroups.set_value(str(begin) + '-' + str(end-1),cur.fetchone()[0])
-
-        cur.execute("SELECT COUNT( * ) FROM  auth_userprofile u JOIN certificates_generatedcertificate c ON u.user_id = c.user_id WHERE YEAR( CURDATE( ) ) - year_of_birth >= 50 and c.course_id = '%s'" % course_name)
-        registeredGroups.set_value(u'50 і більше',cur.fetchone()[0])
-        cur.execute("SELECT COUNT( * ) FROM  auth_userprofile u JOIN certificates_generatedcertificate c ON u.user_id = c.user_id WHERE YEAR( CURDATE( ) ) - year_of_birth >= 50 AND c.status =  'downloadable' and c.course_id = '%s'" % course_name)
-        certifiedGroups.set_value(u'50 і більше',cur.fetchone()[0])
+        registeredGroups.set_value(u'50 і більше', len(reristeredYears[currentYear - reristeredYears.year_of_birth >= 50]))
+        certifiedGroups.set_value(u'50 і більше', len(certifiedYears[currentYear - certifiedYears.year_of_birth >= 50]))
 
         plot_data = pd.concat([pd.DataFrame(registeredGroups.index,index=registeredGroups.index),registeredGroups,certifiedGroups],axis=1,keys=['name','registered','passed'])
         percent_plot_data = pd.concat([pd.Series(registeredGroups.index,index=registeredGroups.index), (certifiedGroups / registeredGroups * 100)],axis=1,keys=['index','percent'])
         percent_plot_data.percent = percent_plot_data.percent.apply(lambda x: int(round(x)))
+
         return plot_data.values,percent_plot_data.values
 
     def education(self, course_name):
