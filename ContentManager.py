@@ -67,13 +67,18 @@ class ContentManager():
              'text':u'якийсь текст'},]
 
     def prometheus(self, id):
-        return {
-            'age':self.__prometheus_age(),
-            'education':self.__prometheus_education(),
-            'gender':self.__prometheus_gender(),
-            'geography':self.__prometheus_geography(),
-            'registration':self.__prometheus_registration(),
-            }[id]
+        if id == 'age':
+            return self.__prometheus_age()
+        elif id == 'education':
+            return self.__prometheus_education()
+        elif id == 'gender':
+            return self.__prometheus_gender()
+        elif id == 'geography':
+            return self.__prometheus_geography()
+        elif id == 'registration':
+            return self.__prometheus_registration()
+        else:
+            return None
 
     def __prometheus_age(self):
         content = {'page':u'Віковий розподіл'}
@@ -96,7 +101,10 @@ class ContentManager():
     def __prometheus_registration(self):
         return None
     def __prometheus_geography(self):
-        return None
+        content = {'page': u'Розподіл користувачі Prometheus по областям України'}
+        with DataManager() as dm:
+            content['geography'], content['without_location'] = dm.geography_all()
+        return 'platform/geography.html', content
 
     def schedule(self,id):
         calculator = ScheduleCalculator(id)

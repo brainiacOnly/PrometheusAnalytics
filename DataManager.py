@@ -146,6 +146,17 @@ class DataManager():
         plot_data.person_gender = plot_data.person_gender.apply(self.map_gender)
         return plot_data.values.tolist()
 
+    def geography_all(self):
+        cur = self.__connection.cursor()
+        cur.execute("select count(*) from auth_userprofile where region_code is null")
+        noLocation = cur.fetchone()[0]
+        cur.close()
+        plot_data = pd.read_sql("select region_code, count(*) as count from auth_userprofile where region_code is not null group by region_code",con=self.__connection)
+        regions = pd.read_csv('static\\data\\regions.csv', encoding='utf8')
+        plot_data = pd.merge(plot_data, regions, on = 'region_code')[['region_code','region_name','count']]
+        print plot_data.values.tolist()
+        return plot_data.values.tolist(), noLocation
+
     def __getChildren(self,id,modules):
         ids = id.split('/')
         name = ids[5]
@@ -176,16 +187,16 @@ class DataManager():
             weeks.append({'name':chapter['metadata']['display_name'],'children':chapter['definition']['children']})
 
         for week in weeks:
-            newchilds = []
+            #newchilds = []
             week['videos'] = []
             week['problems'] = []
             for child in week['children']:
                 week['videos'].append(self.__getSequentialNameById(child,modules,True))
                 week['problems'].append(self.__getSequentialNameById(child,modules,False))
-            del(week['children'])
+            #del(week['children'])
             week['videos'] = filter(lambda x: x != None, week['videos'])
             week['problems'] = filter(lambda x: x != None, week['problems'])
-            week['children'] = list(itertools.chain.from_iterable(newchilds))
+            #week['children'] = list(itertools.chain.from_iterable(newchilds))
 
         for week in weeks:
             for video in week['videos']:

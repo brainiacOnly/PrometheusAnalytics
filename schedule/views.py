@@ -4,7 +4,7 @@ from django.template import *
 from django.shortcuts import render_to_response
 from django.core.context_processors import csrf
 from django.contrib.auth.decorators import login_required
-import  time
+from time import time
 from ContentManager import ContentManager
 from article.views import getUserData
 
@@ -22,7 +22,9 @@ def main(request):
     id = 8
     #id = 20426
     id = 355
+    start_time = time()
     view_name, args['content'] = content.schedule(id)
+    print '#PROFILER schedule took {0}'.format(time()-start_time)
     args['banner'] = {'tilte':u'Ваш розклад навчання','links':[['/',u'Головна'],['/schedule/',u'План навчання']]}
 
     return render_to_response(view_name,args,context_instance=RequestContext(request))
