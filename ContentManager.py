@@ -62,9 +62,10 @@ class ContentManager():
              'text':u'якийсь текст'},]
 
     def __geography(self):
-        return [
-            {'chart':'/chart/geography/',
-             'text':u'якийсь текст'},]
+        content = {'page': u'Географічний розподіл по областям України'}
+        with DataManager() as dm:
+            content['geography'], content['without_location'] = dm.geography(self.course_name)
+        return 'course/geography.html', content
 
     def prometheus(self, id):
         if id == 'age':

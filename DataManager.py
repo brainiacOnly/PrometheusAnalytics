@@ -122,6 +122,19 @@ class DataManager():
         plot_data = pd.read_sql("SELECT module_id, count(*) as amount, min(created) as created_date from courseware_studentmodule where course_id = '{0}' and module_type = 'problem' group by module_id order by created_date".format(course_name), con=self.__connection)
         return plot_data.values.tolist()
 
+    def geography(self, course_name):
+        cur = self.__connection.cursor()
+        cur.execute("select count(*) from auth_userprofile au join student_courseenrollment ce on au.user_id = ce.user_id where ce.course_id = '{0}' and au.region_code is null".format(course_name))
+        noLocation = cur.fetchone()[0]
+        cur.close()
+        plot_data = pd.read_sql(
+            "select region_code, count(*) as count from auth_userprofile au join student_courseenrollment ce on au.user_id = ce.user_id where ce.course_id = '{0}' and au.region_code is not null group by region_code".format(course_name),
+            con=self.__connection)
+        regions = pd.read_csv('static\\data\\regions.csv', encoding='utf8')
+        plot_data = pd.merge(plot_data, regions, on='region_code')[['region_code', 'region_name', 'count']]
+        print plot_data
+        return plot_data.values.tolist(), noLocation
+
     def age_all(self):
         sql = "select 'Вік не вказано',  count(*) from auth_userprofile where year_of_birth is NULL " + \
                 "union " + \
@@ -154,7 +167,6 @@ class DataManager():
         plot_data = pd.read_sql("select region_code, count(*) as count from auth_userprofile where region_code is not null group by region_code",con=self.__connection)
         regions = pd.read_csv('static\\data\\regions.csv', encoding='utf8')
         plot_data = pd.merge(plot_data, regions, on = 'region_code')[['region_code','region_name','count']]
-        print plot_data.values.tolist()
         return plot_data.values.tolist(), noLocation
 
     def __getChildren(self,id,modules):
