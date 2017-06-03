@@ -12,7 +12,7 @@ from time import time
 from article.models import Article, Comments
 from forms import CommentForm
 from ContentManager import ContentManager
-
+import pandas as pd
 
 # Create your views here.
 def basic_one(request):
@@ -100,16 +100,29 @@ def profile(request):
     return render_to_response(view_name,args,context_instance=RequestContext(request))
 
 @login_required(login_url='/auth/login/')
+def manage_registration(request):
+    args = {}
+    args.update(csrf(request))
+    args.update(getUserData(request))
+    content = ContentManager()
+    view_name, args['content'] = content.manage_registration()
+    print args['content']
+    args['banner'] = {'tilte': u'Управління запитами на реєстрацію', 'links': [['/', u'Головна'], ['#', u'Реєстрації']]}
+    return render_to_response(view_name, args, context_instance=RequestContext(request))
+
+@login_required(login_url='/auth/login/')
 def course(request, id = 'main'):
     args = {}
     args.update(csrf(request))
     args.update(getUserData(request))
-    args['course_names'] = ['KPI/Algorithms101/2015_Spring','KPI/Programming101/2015_T1','KNU/101/2014_T2','NAUKMA/101/2014_T2']
+    courses = pd.read_csv('static\\data\\courses.csv', encoding='utf8')
+    #args['course_names'] = ['KPI/Algorithms101/2015_Spring','KPI/Programming101/2015_T1','KNU/101/2014_T2','NAUKMA/101/2014_T2']
+    args['course_names'] = courses.values.tolist()
     if request.session.get('course',None) is None:
         request.session['course'] = args['course_names'][0]
     args['course'] = request.session['course']
     args['path'] = request.path
-    content = ContentManager(request.session['course'])
+    content = ContentManager(request.session['course'][0])
     view_name, args['content'] = content.course(id)
     args['banner'] = {'tilte':u'Виберіть курс та тип візуалізації','links':[['/',u'Головна'],['/course/main/',u'Візуалізація'],['/course/main/',u'Курс'],['#',args['content']['page']]]}
     return render_to_response(view_name,args,context_instance=RequestContext(request))
@@ -128,5 +141,4 @@ def set_course(request):
     args = {}
     args.update(csrf(request))
     request.session['course'] = request.POST['course_name']
-    print 'path is - ', request.path
     return redirect(request.POST['path'])

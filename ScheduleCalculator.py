@@ -19,14 +19,15 @@ class ScheduleCalculator():
     def __getPersonalizedSchedule(self,course_id):
         start_time = time.time()
         with DataManager() as dm:
+            s = time.time()
             sm = dm.studentmodule(course_id, 'problem')
+            print "ELAPCED for studentmodule reading - {0}".format(time.time() - s)
             users = dm.users()
             cert = dm.certificates(course_id)
             courseStructure = dm.getCourseStructure(course_id)
         data_retrieving_time = time.time() - start_time
         print 'ELAPCED(data retrieving for __getPersonalizedSchedule) - ' + str(data_retrieving_time)
 
-        #cert = cert[cert.course_id == course_id]
         registered = cert.user_id.unique()
         users = users[users.user_id.isin(registered)]
 
@@ -76,9 +77,15 @@ class ScheduleCalculator():
 
     def __calculatePersonalIntervalDelay(self,schedule,data,module):
         weeks = copy.deepcopy(schedule)
+        print 'weeks 1'
+        print map(lambda x: len(x[module]),weeks)
         for week in weeks:
-            week[module] = filter(lambda x: x['begin'] != None,week[module])
-        intervals = [max(map(lambda  x: x['end'],week[module])) - min(map(lambda x: x['begin'],week[module])) for week in weeks if len(week[module]) > 0]
+            week[module] = filter(lambda x: x['begin'] is None, week[module])
+        print 'weeks 2'
+        print map(lambda x: len(x[module]), weeks)
+        print 'intervals preview'
+        print [map(lambda x: x['begin'],week[module]) for week in weeks if len(week[module]) > 0]
+        intervals = [max(map(lambda x: x['end'],week[module])) - min(map(lambda x: x['begin'],week[module])) for week in weeks if len(week[module]) > 0]
         delays=[min(map(lambda x: x['begin'],week[module])) for week in weeks if len(week[module])>0]
         delays = [delays[i] - delays[i-1] for i in range(1,len(delays))]
 
@@ -86,6 +93,8 @@ class ScheduleCalculator():
 
     def __aproximateSchedule(self, weeks, data):
         start_time = time.time()
+        print 'before filling passed modules'
+        #print #[map(lambda x: x['begin'],week['videos']) for week in weeks if len(week['videos']) > 0]
         weeks = self.__fillPassedModules(weeks,data)
 
         video_interval, video_delay = self.__calculatePersonalIntervalDelay(weeks,data,'videos')
@@ -116,6 +125,10 @@ class ScheduleCalculator():
         return weeks
 
     def __fillPassedModules(self,weeks,data):
+        data.to_csv('problem_data.csv')
+        import json
+        with open('weeks.json', 'w') as outfile:
+            json.dump(weeks, outfile, ensure_ascii=True)
         for week in weeks:
             for video in week['videos']:
                 if len(np.intersect1d(video['children'], data.module_id)) > 0:

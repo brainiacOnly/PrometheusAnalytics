@@ -7,18 +7,20 @@ from django.contrib.auth.decorators import login_required
 from time import time
 from ContentManager import ContentManager
 from article.views import getUserData
+import pandas as pd
 
 @login_required(login_url='/auth/login/')
 def main(request):
     args = {}
     args.update(csrf(request))
     args.update(getUserData(request))
-    args['course_names'] = ['KPI/Algorithms101/2015_Spring','KPI/Programming101/2015_T1','KNU/101/2014_T2','NAUKMA/101/2014_T2']
+    courses = pd.read_csv('static\\data\\courses.csv', encoding='utf8')
+    args['course_names'] = courses.values.tolist()
     if request.session.get('course',None) is None:
         request.session['course'] = args['course_names'][0]
     args['course'] = request.session['course']
     args['path'] = request.path
-    content = ContentManager(request.session['course'])
+    content = ContentManager(request.session['course'][0])
     id = 8
     #id = 20426
     id = 355

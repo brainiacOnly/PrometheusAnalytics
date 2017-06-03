@@ -1,0 +1,48 @@
+{% extends 'index.html' %}
+{% load staticfiles %}
+
+{% block body %}
+     <section id="title" class="emerald">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h1>Запити на раєстрацію</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ul class="breadcrumb pull-right">
+                        <li><a href="/">Головна</a></li>
+                        <li><a href="/profile/">Профіль</a></li>
+                        <li class="active">Реєстрації</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section><!--/#title-->
+
+    <section id="about-us" class="container" style="min-height: 50%; width: 60%">
+    <div class="row">
+        <div class="panel panel-default">
+
+                <div class="panel-body">
+                    <table class="table table-striped">
+                        <tr>
+                            <th class="col-md-3">Username</th>
+                            <th class="col-md-3">Email</th>
+                            <th class="col-md-3">Дія</th>
+                        </tr>
+                        {% for row in content.data %}
+                            <tr>
+                                <td class="col-md-3">{{ row.username }}</td>
+                                <td class="col-md-3">{{ row.email }}</td>
+                                <td class="col-md-3 text-center">
+                                    <a href="#" class="btn btn-success" role="button">Підтвердити</a>
+                                    <a href="#" class="btn btn-danger" role="button">Відхилити</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+    </div>
+    </section>
+{% endblock %}

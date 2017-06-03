@@ -14,10 +14,10 @@
                               <label for="sel1">Назва курсу:</label>
                               <select class="form-control" id="sel1" name="course_name" onchange="this.form.submit()">
                                   {% for c in course_names %}
-                                    {% if c == course %}
-                                        <option selected="selected">{{ c }}</option>
+                                    {% if c.0 == course %}
+                                        <option value="{{ c.0 }}" selected="selected">{{ c.1 }}</option>
                                     {% else %}
-                                        <option>{{ c }}</option>
+                                        <option value="{{ c.0 }}">{{ c.1 }}</option>
                                     {% endif %}
                                   {% endfor %}
                               </select>
@@ -61,7 +61,6 @@
                 </li>
 
                 <li class="panel {% activator request 'registration' %}">
-                    <!--<a href="/course/underconstruction/">-->
                     <a href="#">
                         Реєстрація
                     </a>
@@ -78,8 +77,8 @@
                     <ul class="collapse" id="component-nav">
 
                         <li class=""><a href="/course/finish/"><i class="icon-angle-right"></i> Завершення </a></li>
-                         <li class=""><a href="#"><i class="icon-angle-right"></i> Питання </a></li>
-                        <li class=""><a href="#"><i class="icon-angle-right"></i> Відповіді </a></li>
+                        <li class=""><a href="#"><i class="icon-angle-right"></i> Тести </a></li>
+                        <li class=""><a href="#"><i class="icon-angle-right"></i> Питання </a></li>
                     </ul>
                 </li>
                 {% endif %}

@@ -119,3 +119,9 @@ class ContentManager():
             content['courses'] = dm.getCoursesResult(username)
             content['name'],content['email'],content['gender'],content['year'],content['education'],content['aim'] = dm.getUserData(username)
         return 'profile.html', content
+
+    def manage_registration(self):
+        content = {'page': u'Управління запитами на раєстрацію'}
+        data = [{'username':'Ivan', 'email':'ivan1322@gmail.com'},{'username':'Olexandr', 'email':'olexa3232@gmail.com'},{'username':'Evgen', 'email':'evgen5959@gmail.com'}]
+        content['data'] = data
+        return 'manage_registration.html', content

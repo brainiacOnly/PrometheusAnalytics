@@ -49,6 +49,7 @@ class DataManager():
 
     def main(self,course_name):
         cur = self.__connection.cursor()
+        print course_name
         cur.execute("select count(*) from certificates_generatedcertificate where status = 'downloadable' and course_id = '%s'" % course_name)
         downloadable = cur.fetchone()[0]
         cur.execute("select count(*) from certificates_generatedcertificate where status != 'downloadable' and course_id = '%s'" % course_name)

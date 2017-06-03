@@ -42,6 +42,7 @@ def logout(request):
     return redirect('/')
 
 def register(request):
+    print 'in register'
     args = {}
     args.update(csrf(request))
     args['form'] = UserCreationForm

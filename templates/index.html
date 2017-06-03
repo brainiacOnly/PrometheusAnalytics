@@ -66,6 +66,9 @@
             <div class="collapse navbar-collapse">
                 <ul class="nav navbar-nav navbar-right">
                     <li class="{% activator request '' %}"><a href="/">Головна</a></li>
+                    {% if is_teacher or is_staff %}
+                        <li class="{% activator request 'predict' %}"><a href="/predict/">Прогноз</a></li>
+                    {% endif %}
                     {% if username %}
                         <li class="{% activator request 'schedule' %}"><a href="/schedule/">План навчання</a></li>
                     {% endif %}
