@@ -42,14 +42,11 @@ class DataManager():
         if len(whereClauses) > 0:
             whereStatement = " WHERE " + " AND ".join(whereClauses)
         sql = "SELECT user_id, grade, course_id, status FROM certificates_generatedcertificate" + whereStatement
-        print 'certificates sql: [%s]' % sql
         result = pd.read_sql(sql, con=self.__connection)
-        print 'certificates(certificates_generatedcertificate table) was executed. The result contains %d rows' % len(result)
         return result
 
     def main(self,course_name):
         cur = self.__connection.cursor()
-        print course_name
         cur.execute("select count(*) from certificates_generatedcertificate where status = 'downloadable' and course_id = '%s'" % course_name)
         downloadable = cur.fetchone()[0]
         cur.execute("select count(*) from certificates_generatedcertificate where status != 'downloadable' and course_id = '%s'" % course_name)
@@ -133,7 +130,6 @@ class DataManager():
             con=self.__connection)
         regions = pd.read_csv('static\\data\\regions.csv', encoding='utf8')
         plot_data = pd.merge(plot_data, regions, on='region_code')[['region_code', 'region_name', 'count']]
-        print plot_data
         return plot_data.values.tolist(), noLocation
 
     def age_all(self):
@@ -223,27 +219,24 @@ class DataManager():
                 content = list(itertools.chain.from_iterable(content))
                 problem['children'] = filter(lambda x: 'problem' in x,content)
 
-        print 'getCourseStructure was executed. The result contains %d weeks' % len(weeks)
         return weeks
 
     def checkEnrolment(self,user_id,course_id):
         cursor = self.__connection.cursor()
         cursor.execute("SELECT count( * ) FROM courseware_studentmodule WHERE student_id = {0} AND course_id = '{1}' AND  (module_type = 'video' or module_type = 'problem')".format(user_id,course_id))
         number_of_rows = cursor.fetchone()[0]
-
+        return False
+        """
         if number_of_rows > 0:
             return True
         else:
             return False
+        """
 
     def get_password(self,name):
         cur = self.__connection.cursor()
-        print 'got a cursor'
         cur.execute("SELECT PASSWORD FROM  auth_user WHERE username =  '%s'" % name)
-        print 'cursor executed'
-        print cur
         answer = cur.fetchone()[0]
-        print 'got the answer'
         return answer
 
     def isTeacher(self,name):

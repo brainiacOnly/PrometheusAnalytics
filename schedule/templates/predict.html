@@ -1,0 +1,113 @@
+{% extends 'index.html' %}
+{% load staticfiles %}
+{% load googlecharts %}
+
+{% block body %}
+    <section id="title" class="emerald">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h1>Прогноз</h1>
+                    <p>Виберіть курс та отримайте прогноз успішності для його студентів</p>
+                </div>
+                <div class="col-sm-6">
+                    <ul class="breadcrumb pull-right">
+                        <li><a href="/">Головна</a></li>
+                        <li class="active">Прогноз</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section><!--/#title-->
+
+    <section id="blog" class="container" style="min-height: 70%;">
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+                <div class="box">
+                    <header>
+                        <div class="toolbar">
+                            <ul class="nav pull-right middle">
+                                <li style="margin-right: 10px;"><h3>Виберіть курс</h3></li>
+                                <li style="margin-right: 10px;">
+                                    <form role="form" action="/course/set_course/" method="post">
+                                              {% csrf_token %}
+                                            <div class="form-group">
+                                              <select class="form-control" id="sel1" name="course_name" onchange="this.form.submit()">
+                                                  {% for c in course_names %}
+                                                    {% if c.0 == course %}
+                                                        <option value="{{ c.0 }}" selected="selected">{{ c.1 }}</option>
+                                                    {% else %}
+                                                        <option value="{{ c.0 }}" >{{ c.1 }}</option>
+                                                    {% endif %}
+                                                  {% endfor %}
+                                              </select>
+                                                <input type="hidden" name="path" value="{{ path }}">
+                                            </div>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </header>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div id="out"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <div id="out2"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <dl class="dl-horizontal">
+                                <dt>Підписалися на курс</dt>
+                                <dd>{{ content.count }}</dd>
+                                <dt>Дата старту курсу</dt>
+                                <dd>{{ content.start_time }}</dd>
+                                <dt>Дата початку раєстрації</dt>
+                                <dd>{{ content.start_enrollment_time }}</dd>
+                                <dt>Кількість тижнів</dt>
+                                <dd>{{ content.weeks_amount }}</dd>
+                            </dl>
+                            <a href="#" class="btn btn-success btn-block" role="button">Скачати CSV</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% googlecharts %}
+
+        {% data content.data "out_data" %}
+        {% col "string" "Name" %}"{{ val }}"{% endcol %}
+        {% col "number" "Percent" %}{{ val }}{% endcol %}
+    {% enddata %}
+    {% options "out_options" %}
+        kind: "PieChart",
+        options: {
+            title: 'Точність прогнозу',
+            pieHole: 0.5,
+            legend: 'none',
+            height: 300,
+            slices: {
+            1: { color: 'transparent' }
+          }
+        }
+    {% endoptions %}
+    {% graph "out" "out_data" "out_options" %}
+
+    {% data content.partition "out_data2" %}
+        {% col "string" "Name" %}"{{ val }}"{% endcol %}
+        {% col "number" "Пройшли, %" %}{{ val }}{% endcol %}
+    {% enddata %}
+    {% options "out_options2" %}
+        kind: "PieChart",
+        options: {
+            title: 'Статус студентів курсу',
+            height: 300,
+            legend: 'none'
+        }
+    {% endoptions %}
+
+    {% graph "out2" "out_data2" "out_options2" %}
+
+{% endgooglecharts %}
+{% endblock %}

@@ -28,7 +28,7 @@ class ContentManager():
     def __main(self):
         with DataManager() as dm:
             data = dm.main(self.course_name)
-        content = {'data':data,'page':u'Сертифікати'}
+        content = {'data': data, 'page': u'Сертифікати'}
         return 'course/main.html',content
 
     def __age(self):
@@ -107,12 +107,6 @@ class ContentManager():
             content['geography'], content['without_location'] = dm.geography_all()
         return 'platform/geography.html', content
 
-    def schedule(self,id):
-        calculator = ScheduleCalculator(id)
-        content = {}
-        content['schedule'] = calculator.getSchedule(self.course_name)
-        return 'schedule.html',content
-
     def profile(self,username):
         content = {'page':u'Ваш профіль'}
         with DataManager() as dm:
@@ -125,3 +119,19 @@ class ContentManager():
         data = [{'username':'Ivan', 'email':'ivan1322@gmail.com'},{'username':'Olexandr', 'email':'olexa3232@gmail.com'},{'username':'Evgen', 'email':'evgen5959@gmail.com'}]
         content['data'] = data
         return 'manage_registration.html', content
+
+    def schedule(self,id):
+        calculator = ScheduleCalculator(id)
+        content = {}
+        content['schedule'] = calculator.getSchedule(self.course_name)
+        return 'schedule.html',content
+
+    def predict(self,id):
+        content = {}
+        content['data'] = [[u'',95],[u'',5]]
+        content['partition'] = [[u'Завершили курс',1035],[u'В процесі',12654],[u'Тільки зараєструвалися на курс',774],[u'Перший курс для користувача в системі',560]]
+        content['count'] = 15023
+        content['start_time'] = '2017-02-01'
+        content['start_enrollment_time'] = '2016-11-01'
+        content['weeks_amount'] = 7
+        return 'predict.html', content

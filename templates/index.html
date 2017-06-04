@@ -67,10 +67,10 @@
                 <ul class="nav navbar-nav navbar-right">
                     <li class="{% activator request '' %}"><a href="/">Головна</a></li>
                     {% if is_teacher or is_staff %}
-                        <li class="{% activator request 'predict' %}"><a href="/predict/">Прогноз</a></li>
+                        <li class="{% activator request 'predict' %}"><a href="/analysis/predict/">Прогноз</a></li>
                     {% endif %}
                     {% if username %}
-                        <li class="{% activator request 'schedule' %}"><a href="/schedule/">План навчання</a></li>
+                        <li class="{% activator request 'schedule' %}"><a href="/analysis/schedule/">План навчання</a></li>
                     {% endif %}
                     <li class="dropdown {% activator request 'course' %} {% activator request 'platform' %}">
                         <a href="#"  class="dropdown-toggle" data-toggle="dropdown">Візуалізація<i class="icon-angle-down"></i></a>

@@ -106,7 +106,6 @@ def manage_registration(request):
     args.update(getUserData(request))
     content = ContentManager()
     view_name, args['content'] = content.manage_registration()
-    print args['content']
     args['banner'] = {'tilte': u'Управління запитами на реєстрацію', 'links': [['/', u'Головна'], ['#', u'Реєстрації']]}
     return render_to_response(view_name, args, context_instance=RequestContext(request))
 
@@ -119,10 +118,10 @@ def course(request, id = 'main'):
     #args['course_names'] = ['KPI/Algorithms101/2015_Spring','KPI/Programming101/2015_T1','KNU/101/2014_T2','NAUKMA/101/2014_T2']
     args['course_names'] = courses.values.tolist()
     if request.session.get('course',None) is None:
-        request.session['course'] = args['course_names'][0]
+        request.session['course'] = args['course_names'][0][0]
     args['course'] = request.session['course']
     args['path'] = request.path
-    content = ContentManager(request.session['course'][0])
+    content = ContentManager(request.session['course'])
     view_name, args['content'] = content.course(id)
     args['banner'] = {'tilte':u'Виберіть курс та тип візуалізації','links':[['/',u'Головна'],['/course/main/',u'Візуалізація'],['/course/main/',u'Курс'],['#',args['content']['page']]]}
     return render_to_response(view_name,args,context_instance=RequestContext(request))
