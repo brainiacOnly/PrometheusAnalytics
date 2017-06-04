@@ -3,32 +3,47 @@
 {% load activator %}
 
 {% block body %}
+
+<section id="title" class="emerald">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h1>Курс</h1>
+                    <p>Інформація про користувачів певного курсу</p>
+                </div>
+                <div class="col-sm-6">
+                    <ul class="breadcrumb pull-right">
+                        <li><a href="/">Головна</a></li>
+                        <li class="active">Курс</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section><!--/#title-->
+
+    <section class="container" style="min-height: 70%;">
+
     <div id="wrap">
         <div id="left">
-            <div class="media user-media well-small">
-                <br>
-                <div class="media-body">
-                    <form role="form" action="/course/set_course/" method="post">
-                              {% csrf_token %}
-                            <div class="form-group">
-                              <label for="sel1">Назва курсу:</label>
-                              <select class="form-control" id="sel1" name="course_name" onchange="this.form.submit()">
-                                  {% for c in course_names %}
-                                    {% if c.0 == course %}
-                                        <option value="{{ c.0 }}" selected="selected">{{ c.1 }}</option>
-                                    {% else %}
-                                        <option value="{{ c.0 }}">{{ c.1 }}</option>
-                                    {% endif %}
-                                  {% endfor %}
-                              </select>
-                                <input type="hidden" name="path" value="{{ path }}">
-                            </div>
-                    </form>
-                </div>
-                <br>
+            <div>
+                <form role="form" action="/course/set_course/" method="post">
+                      {% csrf_token %}
+                    <div class="form-group">
+                      <label for="sel1">Назва курсу:</label>
+                      <select class="form-control" id="sel1" name="course_name" onchange="this.form.submit()">
+                          {% for c in course_names %}
+                            {% if c.0 == course %}
+                                <option value="{{ c.0 }}" selected="selected">{{ c.1 }}</option>
+                            {% else %}
+                                <option value="{{ c.0 }}">{{ c.1 }}</option>
+                            {% endif %}
+                          {% endfor %}
+                      </select>
+                        <input type="hidden" name="path" value="{{ path }}">
+                    </div>
+                </form>
             </div>
             <ul id="menu" class="collapse">
-
 
                 <li class="panel {% activator request 'main' %}">
                     <a href="/course/main/">
@@ -86,11 +101,10 @@
             </ul>
         </div>
 
-        <div id="content" >
-            <div class="inner" style="min-height: 700px;">
+        <div id="content" style="width: 73%">
                {% block data %}{% endblock %}
-            </div>
         </div>
 
     </div>
+    </section>
 {% endblock %}
