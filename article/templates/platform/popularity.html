@@ -1,0 +1,38 @@
+{% extends 'prometheus.html' %}
+{% load googlecharts %}
+
+{% block data %}
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Найпопулярніші курси
+                </div>
+
+                <div class="panel-body">
+                    <div id="out"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% googlecharts %}
+        {% data content.popularity "out_data2" %}
+            {% col "string" "Назва" %}"{{ val }}"{% endcol %}
+            {% col "number" "Зареєстровано" %}{{ val }}{% endcol %}
+        {% enddata %}
+        {% options "out_options2" %}
+            kind: "BarChart",
+            options: {
+                legend: 'none',
+                height: 500
+            }
+        {% endoptions %}
+        {% graph "out" "out_data2" "out_options2" %}
+
+
+{% endgooglecharts %}
+
+{% endblock %}

@@ -169,9 +169,19 @@ class DataManager():
     def registration_all(self):
         plot_data = pd.read_sql(
             "select date(date_joined) as date_registration, count(*) from auth_user group by date_registration order by date_registration",
-            con=self.__connection)
-        print plot_data.values.tolist()
-        return plot_data.values.tolist()
+            con=self.__connection).values.tolist()
+        return plot_data
+
+    def courses_popularity(self):
+        plot_data = pd.read_sql(
+            "select course_id, count(*) as amount from student_courseenrollment group by course_id order by amount desc",
+            con=self.__connection).values.tolist()
+        courses = pd.read_csv('static\\data\\courses.csv', encoding='utf8').values.tolist()
+        courses = {item[0]: item[1:] for item in courses}
+        plot_data = [[courses[i[0]][0], i[1]] for i in plot_data if i[0] in courses.keys()]
+        #for i in plot_data:
+        #    print i[0][0]
+        return plot_data
 
     def __getChildren(self,id,modules):
         ids = id.split('/')

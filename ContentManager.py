@@ -78,6 +78,8 @@ class ContentManager():
             return self.__prometheus_geography()
         elif id == 'registration':
             return self.__prometheus_registration()
+        elif id == 'popularity':
+            return self.__prometheus_popularity()
         else:
             return None
 
@@ -110,6 +112,12 @@ class ContentManager():
         with DataManager() as dm:
             content['geography'], content['without_location'] = dm.geography_all()
         return 'platform/geography.html', content
+
+    def __prometheus_popularity(self):
+        content = {'page': u'Популярність курсів'}
+        with DataManager() as dm:
+            content['popularity'] = dm.courses_popularity()
+        return 'platform/popularity.html', content
 
     def profile(self,username):
         content = {'page':u'Ваш профіль'}
