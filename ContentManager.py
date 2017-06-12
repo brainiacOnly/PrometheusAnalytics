@@ -100,9 +100,13 @@ class ContentManager():
         return 'platform/gender.html',content
 
     def __prometheus_registration(self):
-        return None
+        content = {'page': u'Графік реєстрації'}
+        with DataManager() as dm:
+            content['registration'] = dm.registration_all()
+        return 'platform/registration.html', content
+
     def __prometheus_geography(self):
-        content = {'page': u'Розподіл користувачі Prometheus по областям України'}
+        content = {'page': u'Розподіл користувачів Prometheus по областям України'}
         with DataManager() as dm:
             content['geography'], content['without_location'] = dm.geography_all()
         return 'platform/geography.html', content

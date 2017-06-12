@@ -166,6 +166,13 @@ class DataManager():
         plot_data = pd.merge(plot_data, regions, on = 'region_code')[['region_code','region_name','count']]
         return plot_data.values.tolist(), noLocation
 
+    def registration_all(self):
+        plot_data = pd.read_sql(
+            "select date(date_joined) as date_registration, count(*) from auth_user group by date_registration order by date_registration",
+            con=self.__connection)
+        print plot_data.values.tolist()
+        return plot_data.values.tolist()
+
     def __getChildren(self,id,modules):
         ids = id.split('/')
         name = ids[5]

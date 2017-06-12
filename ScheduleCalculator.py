@@ -5,7 +5,6 @@ from DataManager import DataManager
 import time
 import copy
 from PassChanceEstimator import PassChanceEstimator
-from ParallelPassChanceEstimator import ParallelPassChanceEstimator
 
 class ScheduleCalculator():
     def __init__(self,id):
@@ -31,7 +30,7 @@ class ScheduleCalculator():
         registered = cert.user_id.unique()
         users = users[users.user_id.isin(registered)]
 
-        classifier = ParallelPassChanceEstimator()
+        classifier = PassChanceEstimator()
         fit_start_time = time.time()
         score = classifier.fit(sm,users,cert,self.user_id)
         fit_time = time.time() - fit_start_time
