@@ -132,6 +132,12 @@ class DataManager():
         plot_data = pd.merge(plot_data, regions, on='region_code')[['region_code', 'region_name', 'count']]
         return plot_data.values.tolist(), noLocation
 
+    def registration(self, course_id):
+        plot_data = pd.read_sql(
+            "select DATE(created) as created_date, count(*) as amount from student_courseenrollment where course_id = '{0}' group by created_date order by created_date".format(course_id),
+            con=self.__connection).values.tolist()
+        return plot_data
+
     def age_all(self):
         sql = "select 'Вік не вказано',  count(*) from auth_userprofile where year_of_birth is NULL " + \
                 "union " + \

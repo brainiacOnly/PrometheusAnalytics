@@ -56,10 +56,10 @@ class ContentManager():
         return 'course/finish.html',content
 
     def __registration(self):
-
-        return [
-            {'chart':'/chart/geography/',
-             'text':u'якийсь текст'},]
+        content = {'page': u'Графік реєстрації'}
+        with DataManager() as dm:
+            content['registration'] = dm.registration(self.course_name)
+        return 'course/registration.html', content
 
     def __geography(self):
         content = {'page': u'Географічний розподіл по областям України'}

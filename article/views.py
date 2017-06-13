@@ -115,7 +115,6 @@ def course(request, id = 'main'):
     args.update(csrf(request))
     args.update(getUserData(request))
     courses = pd.read_csv('static\\data\\courses.csv', encoding='utf8')
-    #args['course_names'] = ['KPI/Algorithms101/2015_Spring','KPI/Programming101/2015_T1','KNU/101/2014_T2','NAUKMA/101/2014_T2']
     args['course_names'] = courses.values.tolist()
     if request.session.get('course',None) is None:
         request.session['course'] = args['course_names'][0][0]
