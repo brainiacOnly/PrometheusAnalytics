@@ -120,6 +120,10 @@ class DataManager():
         plot_data = pd.read_sql("SELECT module_id, count(*) as amount, min(created) as created_date from courseware_studentmodule where course_id = '{0}' and module_type = 'problem' group by module_id order by created_date".format(course_name), con=self.__connection)
         return plot_data.values.tolist()
 
+    def tests(self,course_name):
+        plot_data = pd.read_sql("select module_id, ROUND(AVG(grade/max_grade*100),2) as avg_pass_percent, min(created) as created_date  from courseware_studentmodule where course_id = '{0}' and module_type = 'problem' and grade is not null group by module_id order by created_date".format(course_name), con=self.__connection)
+        return plot_data.values.tolist()
+
     def geography(self, course_name):
         cur = self.__connection.cursor()
         cur.execute("select count(*) from auth_userprofile au join student_courseenrollment ce on au.user_id = ce.user_id where ce.course_id = '{0}' and au.region_code is null".format(course_name))

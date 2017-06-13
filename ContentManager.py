@@ -22,6 +22,8 @@ class ContentManager():
             return self.__registration()
         if id == 'finish':
             return self.__finish()
+        if id == 'tests':
+            return self.__tests()
 
         raise ValueError('Undefined content id: {}'.format(id))
 
@@ -54,6 +56,12 @@ class ContentManager():
         with DataManager() as dm:
             content['data'] = dm.finish(self.course_name)
         return 'course/finish.html',content
+
+    def __tests(self):
+        content = {'page':u'Успішність студентів на тестів'}
+        with DataManager() as dm:
+            content['data'] = dm.tests(self.course_name)
+        return 'course/tests.html', content
 
     def __registration(self):
         content = {'page': u'Графік реєстрації'}
