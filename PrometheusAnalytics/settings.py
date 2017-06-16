@@ -29,10 +29,10 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 TEMPLATE_DIRS = {
-    'F:/Projects/PA/PrometheusAnalytics/templates',
-    'F:/Projects/PA/PrometheusAnalytics/article/templates',
-    'F:/Projects/PA/PrometheusAnalytics/schedule/templates',
-    'F:/Projects/PA/PrometheusAnalytics/loginsys/templates',
+    'C:/Projects/PrometheusAnalytics/templates',
+    'C:/Projects/PrometheusAnalytics/article/templates',
+    'C:/Projects/PrometheusAnalytics/schedule/templates',
+    'C:/Projects/PrometheusAnalytics/loginsys/templates',
 }
 
 # Application definition
@@ -46,6 +46,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 	'extensions',
     'googlecharts',
+    'mathfilters',
     'article',
     'schedule',
     'loginsys',

@@ -2,12 +2,15 @@
 from DataManager import DataManager
 from ScheduleCalculator import ScheduleCalculator
 from time import time
+import copy
+import random
+import json
 
 class ContentManager():
     def __init__(self,cname = None):
         self.course_name = cname
 
-    def course(self, id):
+    def course(self, id, args, request):
         if id == 'main':
             return self.__main()
         if id == 'age':
@@ -24,8 +27,19 @@ class ContentManager():
             return self.__finish()
         if id == 'tests':
             return self.__tests()
+        if id == 'questions':
+            self.__fillProblemNames(args, request)
+            return self.__questions(args['problem_id'], args['problems'])
 
         raise ValueError('Undefined content id: {}'.format(id))
+
+    def __fillProblemNames(self, args, request):
+        course_id = args['course']
+        with DataManager() as dm:
+            args['problems'] = dm.problems(course_id)
+        if 'problem_id' not in args or args['problem_id'] not in map(lambda x: x['name'],args['problems']):
+            args['problem_id'] = args['problems'][0]['name']
+        request.session['problem_id'] = args['problem_id']
 
     def __main(self):
         with DataManager() as dm:
@@ -75,6 +89,60 @@ class ContentManager():
             content['geography'], content['without_location'] = dm.geography(self.course_name)
         return 'course/geography.html', content
 
+    def __questions(self, problem_id, problems):
+        content = {'page': u'Характер відповідей на питання'}
+        with DataManager() as dm:
+            problem_info = dm.prolmem_info(self.course_name, problem_id)
+
+        mask = self.__get_answers_mask(problem_info)
+        display_info = copy.deepcopy((i for i in problems if i['name'] == problem_id).next())
+        j_counter = 0
+        for j in display_info['structure']:
+            k_counter = 0
+            for k in j['options']:
+                k['amount'] = mask[j_counter][k_counter]
+                k_counter += 1
+            j_counter += 1
+
+        print display_info
+        content['questions'] = display_info
+        return 'course/questions.html', content
+
+    #some magic from parsing edecational json
+    def __get_answers_mask(self, values):
+        result = {}
+        for i in values:
+            answer_info = json.loads(i[0])
+            for answer, options in answer_info['student_answers'].iteritems():
+                for option in options:
+                    name = u'{0}_{1}'.format(answer, option)
+                    if name in result:
+                        result[name] += 1
+                    else:
+                        result[name] = 1
+
+        def GetNumber(key):
+            i = key.index(u'_') + 1
+            newkey = key[i:]
+            i = newkey.index(u'_')
+            return int(newkey[:i])
+
+        question_keys = {}
+        ids = list(set(map(GetNumber, result)))
+        for i, j in enumerate(ids):
+            question_keys[j] = i
+
+        result2 = {}
+        for i, j in result.iteritems():
+            testNumber = GetNumber(i)
+            back_index = i[::-1].index('_')
+            choise_number = int(i[len(i) - back_index:])
+            testName = question_keys[testNumber]
+            if testName not in result2:
+                result2[testName] = {choise_number: j}
+            else:
+                result2[testName][choise_number] = j
+        return result2
     def prometheus(self, id):
         if id == 'age':
             return self.__prometheus_age()

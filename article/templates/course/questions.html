@@ -1,0 +1,135 @@
+{% extends 'course.html'  %}
+{% load googlecharts %}
+{% load mathfilters %}
+
+{% block data %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <section id="blog" class="container" style="min-height: 70%;">
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+                <div class="box" style="border: 0">
+
+                    <header>
+                        <div class="toolbar">
+                            <ul class="nav pull-right middle">
+                                <li style="margin-right: 10px;"><h3>Виберіть тест</h3></li>
+                                <li style="margin-right: 10px;">
+                                    <form role="form" action="/course/set_problem/" method="post">
+                                              {% csrf_token %}
+                                            <div class="form-group">
+                                              <select class="form-control" id="sel1" name="problem_id" onchange="this.form.submit()">
+                                                  {% for p in problems %}
+                                                    {% if c.name == problem_id %}
+                                                        <option value="{{ p.name }}" selected="selected">{{ p.display_name }}</option>
+                                                    {% else %}
+                                                        <option value="{{ p.name }}" >{{ p.display_name }}</option>
+                                                    {% endif %}
+                                                  {% endfor %}
+                                              </select>
+                                                <input type="hidden" name="path" value="{{ path }}">
+                                            </div>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </header>
+                    <div class="row" style="margin-left: 0; margin-right: 0;">
+                        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                          {% if content.questions  %}
+                            <div class="panel panel-default">
+                            <div class="panel-heading" role="tab" id="headingOne">
+                              <h4 class="panel-title">
+                                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                  #1 {{ content.questions.structure.0.task }}
+                                </a>
+                              </h4>
+                            </div>
+                            <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                              <div class="panel-body">
+                                <div id="screen0" ></div>
+
+                                <script type="text/javascript">
+                                  google.charts.load('current', {packages: ['corechart', 'bar']});
+                                  google.setOnLoadCallback(drawChart);
+
+                                  function drawChart() {
+                                    var data = google.visualization.arrayToDataTable([
+                                     ['','Відповіді', { role: 'style' }, { type:'string',role: 'tooltip','p': {'html': true} }, {'role':'annotation'} ],
+                                        {% for option in content.questions.structure.0.options %}
+                                            {% if option.correct %}
+                                                ['Відповідь №{{ forloop.counter }}',{{ option.amount }}, '#2ecc71', '{{ option.text }}' ,{{ option.amount }}],
+                                            {% else %}
+                                                ['Відповідь №{{ forloop.counter }}',{{ option.amount }}, 'silver', '{{ option.text }}' ,{{ option.amount }}],
+                                            {% endif %}
+                                        {% endfor %}
+                                  ]);
+
+                                  var options = {
+                                      legend: 'none',
+                                      height: {{ content.questions.structure.0.options|length|mul:60 }}
+                                  };
+
+                                    var chart = new google.visualization.BarChart(document.getElementById('screen0'));
+                                    chart.draw(data, options);
+                                  }
+                                </script>
+                              </div>
+                            </div>
+                          </div>
+                        {% endif %}
+                          {% for question in content.questions.structure|slice:"1:" %}
+                          <div class="panel panel-default">
+                            <div class="panel-heading" role="tab" id="heading{{ forloop.counter|add:"1" }}">
+                              <h4 class="panel-title">
+                                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ forloop.counter|add:"1" }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter|add:"1" }}">
+                                   #{{ forloop.counter|add:"1" }} {{ question.task }}
+                                </a>
+                              </h4>
+                            </div>
+                            <div id="collapse{{ forloop.counter|add:"1" }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{ forloop.counter|add:"1" }}">
+                              <div class="panel-body">
+                                <div id="screen{{ forloop.counter|add:"1" }}" style="margin-left: 10%"></div>
+
+                                <script type="text/javascript">
+                                  google.charts.load('current', {packages: ['corechart', 'bar']});
+                                  google.setOnLoadCallback(drawChart);
+
+                                  function drawChart() {
+                                    var data = google.visualization.arrayToDataTable([
+                                     ['','Відповіді', { role: 'style' }, { type:'string',role: 'tooltip','p': {'html': true} }, {'role':'annotation'} ],
+                                        {% for option in question.options %}
+                                            {% if option.correct %}
+                                                ['Відповідь №{{ forloop.counter }}',{{ option.amount }}, '#2ecc71', '{{ option.text }}' ,{{ option.amount }}],
+                                            {% else %}
+                                                ['Відповідь №{{ forloop.counter }}',{{ option.amount }}, 'silver', '{{ option.text }}' ,{{ option.amount }}],
+                                            {% endif %}
+                                        {% endfor %}
+                                  ]);
+
+                                  var options = {
+                                      legend: 'none',
+                                      height: {{ question.options|length|mul:60 }},
+                                  };
+
+                                    var chart = new google.visualization.BarChart(document.getElementById('screen{{ forloop.counter|add:"1" }}'));
+                                    chart.draw(data, options);
+                                  }
+                                </script>
+                              </div>
+                            </div>
+                          </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+        </div>
+    </div>
+
+{% endblock %}

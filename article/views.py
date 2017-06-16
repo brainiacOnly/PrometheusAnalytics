@@ -13,6 +13,7 @@ from article.models import Article, Comments
 from forms import CommentForm
 from ContentManager import ContentManager
 import pandas as pd
+from DataManager import DataManager
 
 # Create your views here.
 def basic_one(request):
@@ -121,7 +122,7 @@ def course(request, id = 'main'):
     args['course'] = request.session['course']
     args['path'] = request.path
     content = ContentManager(request.session['course'])
-    view_name, args['content'] = content.course(id)
+    view_name, args['content'] = content.course(id, args, request)
     args['banner'] = {'tilte':u'Виберіть курс та тип візуалізації','links':[['/',u'Головна'],['/course/main/',u'Візуалізація'],['/course/main/',u'Курс'],['#',args['content']['page']]]}
     return render_to_response(view_name,args,context_instance=RequestContext(request))
 
@@ -139,4 +140,10 @@ def set_course(request):
     args = {}
     args.update(csrf(request))
     request.session['course'] = request.POST['course_name']
+    return redirect(request.POST['path'])
+
+def set_problem(request):
+    args = {}
+    args.update(csrf(request))
+    request.session['problem_id'] = request.POST['problem_id']
     return redirect(request.POST['path'])

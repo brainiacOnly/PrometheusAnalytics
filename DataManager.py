@@ -11,6 +11,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 import itertools
 from Credential import Credential
+from xml.dom import minidom
 
 class DataManager():
     def __enter__(self):
@@ -31,6 +32,28 @@ class DataManager():
         sql = "SELECT user_id, gender, year_of_birth, level_of_education from auth_userprofile"
         result = pd.read_sql(sql, con=self.__connection)
         return result
+
+    def problems(self, course_id):
+        credentials = Credential.GetMongoSettings()
+        client = MongoClient(credentials.Address, credentials.Port)
+        modules = client.edxapp.modulestore
+        org, course, period = course_id.split('/')
+        problems = []
+        for problem in modules.find({"_id.course": course, "_id.org": org, "_id.category": "problem"}):
+            name = problem['_id']['name']
+            xml = minidom.parseString(problem['definition']['data']['data'].encode('utf-8'))
+            vertical = modules.find_one({"_id.course": course, "_id.org": org, "_id.category": "vertical",
+                                         'definition.children': {'$elemMatch': {'$regex': ".*{0}.*".format(name)}}})
+            display_name = vertical['metadata']['display_name']
+            structure = []
+            for node in xml.documentElement.getElementsByTagName('checkboxgroup'):
+                #task = node.getAttribute('label')[:80] + '...'
+                task = node.getAttribute('label')
+                options = [{'correct': i.getAttribute('correct') == 'true', 'text': i.firstChild.nodeValue[:80] + ('...' if len(i.firstChild.nodeValue) > 80 else '')} for i in node.getElementsByTagName('choice')]
+                structure.append({'task': task, 'options': options})
+            problems.append(
+                {'org': org, 'course': course, 'name': name, 'display_name': display_name, 'structure': structure})
+        return problems
 
     def certificates(self, course_id = "", status = ""):
         whereClauses = []
@@ -123,6 +146,12 @@ class DataManager():
     def tests(self,course_name):
         plot_data = pd.read_sql("select module_id, ROUND(AVG(grade/max_grade*100),2) as avg_pass_percent, min(created) as created_date  from courseware_studentmodule where course_id = '{0}' and module_type = 'problem' and grade is not null group by module_id order by created_date".format(course_name), con=self.__connection)
         return plot_data.values.tolist()
+
+    def prolmem_info(self, course_id, problem_id):
+        data = pd.read_sql(
+            "select state  from courseware_studentmodule where course_id = '{0}' and grade is not null and module_id like '%{1}'".format(
+                course_id, problem_id), con=self.__connection)
+        return data.values.tolist()
 
     def geography(self, course_name):
         cur = self.__connection.cursor()

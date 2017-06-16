@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^profile/', 'article.views.profile'),
     url(r'^manage_registration/', 'article.views.manage_registration'),
     url(r'^course/set_course/$', 'article.views.set_course'),
+    url(r'^course/set_problem/$', 'article.views.set_problem'),
     url(r'^course/(?P<id>\w+)/$', 'article.views.course'),
     url(r'^platform/(?P<id>\w+)/$', 'article.views.platform'),
     url(r'^', 'article.views.face'),
