@@ -22,7 +22,7 @@
 
     <section id="blog" class="container" style="min-height: 70%;">
         <div class="row">
-            <div class="col-md-10 col-md-offset-1">
+            <div class="col-md-12">
                 <div class="box">
                     <header>
                         <div class="toolbar">
@@ -56,12 +56,14 @@
                             <div id="out2"></div>
                         </div>
                         <div class="col-md-4">
-                            <dl class="dl-horizontal">
+                            <dl class="dl-horizontal" >
                                 <dt>Підписалися на курс</dt>
                                 <dd>{{ content.count }}</dd>
+                                <dt style="white-space: normal;">Перший курс на Promeheus</dt>
+                                <dd>{{ content.first_course }}</dd>
                                 <dt>Дата старту курсу</dt>
                                 <dd>{{ content.start_time }}</dd>
-                                <dt>Дата початку раєстрації</dt>
+                                <dt style="white-space: normal;">Дата початку раєстрації</dt>
                                 <dd>{{ content.start_enrollment_time }}</dd>
                                 <dt>Кількість тижнів</dt>
                                 <dd>{{ content.weeks_amount }}</dd>
@@ -76,7 +78,7 @@
 
     {% googlecharts %}
 
-        {% data content.data "out_data" %}
+        {% data content.accuracy "out_data" %}
         {% col "string" "Name" %}"{{ val }}"{% endcol %}
         {% col "number" "Percent" %}{{ val }}{% endcol %}
     {% enddata %}

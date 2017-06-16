@@ -325,17 +325,6 @@ class DataManager():
             return u'інше'
         else:
             return id
-        """
-        {"p":u'кандидатський чи докторський ступінь',
-         "m":u'магістр',
-         "b":u'бакалавр',
-         "a":u'незакінчена вища освіта',
-         "hs":u'середня освіта',
-         "jhs":u'професійно-технічна освіта',
-         "el":u'початкова освіта',
-         "none":u'немає',
-         "other":u'інше'}[id]
-        """
 
     def map_gender(self,id):
         if id == 'm':
@@ -388,3 +377,28 @@ class DataManager():
         allCourses = self.getAllCourseNames()
         courses.course_id = courses.course_id.apply(lambda x: allCourses[x])
         return courses[['course_id','grade']].values
+
+    def getUserStatuses(self, course_id):
+        sql = "select 'Завершили курс', count(*) from certificates_generatedcertificate where course_id = '{0}' and status = 'downloadable' ".format(course_id) + \
+              "union " + \
+              "select 'Почали проходити курс', count(*) from student_courseenrollment ce where ce.course_id = '{0}' and not exists(select user_id from certificates_generatedcertificate c where course_id = '{0}' and status = 'downloadable' and ce.user_id = c.user_id) and exists(select student_id from courseware_studentmodule sm where sm.course_id = '{0}' and ce.user_id = sm.student_id) ".format(course_id) + \
+              "union " + \
+              "select 'Тільки зареєструвалися на курс', count(*) from student_courseenrollment ce where ce.course_id = '{0}' and not exists(select user_id from certificates_generatedcertificate c where course_id = '{0}' and status = 'downloadable' and ce.user_id = c.user_id) and not exists(select student_id from courseware_studentmodule sm where sm.course_id = '{0}' and ce.user_id = sm.student_id)".format(course_id)
+        statuses = pd.read_sql(sql,con = self.__connection)
+        return statuses.values.tolist()
+
+    def countFirstCourse(self, course_id):
+        sql = "select count(*) from student_courseenrollment ce where ce.course_id = '{0}' and not exists(select * from student_courseenrollment sce where sce.user_id = ce.user_id and sce.id != ce.id)".format(course_id)
+        cur = self.__connection.cursor()
+        cur.execute(sql)
+        answer = cur.fetchone()
+        cur.close()
+        return answer[0]
+
+    def getCourseInfo(self, course_id):
+        credentials = Credential.GetMongoSettings()
+        client = MongoClient(credentials.Address, credentials.Port)
+        modules = client.edxapp.modulestore
+        org, course, name = course_id.split('/')
+        result = modules.find_one({"_id.category": "course", "_id.org": org, "_id.course": course, "_id.name": name})
+        return result

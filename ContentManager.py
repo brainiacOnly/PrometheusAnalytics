@@ -214,12 +214,23 @@ class ContentManager():
         content['schedule'] = calculator.getSchedule(self.course_name)
         return 'schedule.html',content
 
-    def predict(self,id):
+    def predict(self):
         content = {}
-        content['data'] = [[u'',95],[u'',5]]
-        content['partition'] = [[u'Завершили курс',1035],[u'В процесі',12654],[u'Тільки зараєструвалися на курс',774],[u'Перший курс для користувача в системі',560]]
-        content['count'] = 15023
-        content['start_time'] = '2017-02-01'
-        content['start_enrollment_time'] = '2016-11-01'
-        content['weeks_amount'] = 7
+        # content['partition'] = [[u'Завершили курс', 1035], [u'В процесі', 12654],
+        #                        [u'Тільки зараєструвалися на курс', 774],
+        #                        [u'Перший курс для користувача в системі', 560]]
+        # content['count'] = 15023
+        #content['start_time'] = '2017-02-01'
+        #content['start_enrollment_time'] = '2016-11-01'
+        #content['weeks_amount'] = 7
+        with DataManager() as dm:
+            content['partition'] = dm.getUserStatuses(self.course_name)
+            content['count'] = sum(map(lambda x: x[1],content['partition']))
+            content['first_course'] = dm.countFirstCourse(self.course_name)
+            course_info = dm.getCourseInfo(self.course_name)
+            content['start_time'] = course_info['metadata']['start']
+            content['start_enrollment_time'] = course_info['metadata']['enrollment_start']
+            content['weeks_amount'] = len(course_info['definition']['children'])
+        content['accuracy'] = [[u'',95],[u'',5]]
+
         return 'predict.html', content

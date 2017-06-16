@@ -43,6 +43,6 @@ def predict(request):
     args['course'] = request.session['course']
     args['path'] = request.path
     content = ContentManager(request.session['course'])
-    view_name, args['content'] = content.predict(id)
+    view_name, args['content'] = content.predict()
     args['banner'] = {'tilte':u'Прогноз','links':[['/',u'Головна'],['/analysis/predict/',u'Прогноз']]}
     return render_to_response(view_name,args,context_instance=RequestContext(request))
