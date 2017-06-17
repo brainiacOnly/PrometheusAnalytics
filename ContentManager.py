@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from DataManager import DataManager
 from ScheduleCalculator import ScheduleCalculator
+from Predictor import Predictor
 from time import time
 import copy
 import random
 import json
+import pandas as pd
 
 class ContentManager():
     def __init__(self,cname = None):
@@ -231,6 +233,16 @@ class ContentManager():
             content['start_time'] = course_info['metadata']['start']
             content['start_enrollment_time'] = course_info['metadata']['enrollment_start']
             content['weeks_amount'] = len(course_info['definition']['children'])
-        content['accuracy'] = [[u'',95],[u'',5]]
+            studentmodule = dm.studentmodule(self.course_name,'problem',columns=['student_id as user_id', 'module_id', 'grade', 'created'])
+            certificates = dm.certificates(self.course_name,'downloadable', True, ['user_id', '1 as status'])
+            classifier = Predictor()
+            score = classifier.fit(studentmodule, certificates)
+            content['accuracy'] = [[u'', score * 100], [u'', (1 - score) * 100]]
+            result = classifier.predictAll()
+            statusForActive = dm.getStatusForActiveOnCourseUsers(self.course_name)
+            statusForInactive = dm.getStatusForInactiveOnCourseUsers(self.course_name)
+            result = pd.merge(result, statusForActive, how='left', left_index=True, right_index=True)
+            result = pd.concat([result, statusForInactive])
+            content['predict_csv'] = result[['email','status','prediction']].values.tolist()
 
         return 'predict.html', content

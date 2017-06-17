@@ -24,8 +24,13 @@ class DataManager():
         if self.__connection:
             self.__connection.close()
 
-    def studentmodule(self,course_id, module_type):
-        result = pd.read_sql("SELECT module_id, student_id as user_id, grade, max_grade, course_id, created, modified from courseware_studentmodule where course_id = '{0}' and module_type = '{1}'".format(course_id, module_type),con=self.__connection)
+    def studentmodule(self,course_id, module_type, columns = None):
+        if columns == None:
+            columns = ['module_id', 'student_id as user_id', 'grade', 'max_grade', 'course_id', 'created', 'modified']
+        columnsRequest = ','.join(columns)
+        sql = "SELECT {2} from courseware_studentmodule where course_id = '{0}' and module_type = '{1}'".format(course_id, module_type,columnsRequest)
+        print sql
+        result = pd.read_sql(sql,con=self.__connection)
         return result
 
     def users(self):
@@ -55,7 +60,7 @@ class DataManager():
                 {'org': org, 'course': course, 'name': name, 'display_name': display_name, 'structure': structure})
         return problems
 
-    def certificates(self, course_id = "", status = ""):
+    def certificates(self, course_id = "", status = "", user_id_as_index = False, columns=['user_id', 'grade', 'course_id', 'status']):
         whereClauses = []
         whereStatement = ""
         if course_id != "":
@@ -64,8 +69,14 @@ class DataManager():
             whereClauses.append("status = '%s'" % status)
         if len(whereClauses) > 0:
             whereStatement = " WHERE " + " AND ".join(whereClauses)
-        sql = "SELECT user_id, grade, course_id, status FROM certificates_generatedcertificate" + whereStatement
-        result = pd.read_sql(sql, con=self.__connection)
+
+        columndRequest = ",".join(columns)
+        sql = "SELECT {0} FROM certificates_generatedcertificate".format(columndRequest) + whereStatement
+        print sql
+        if user_id_as_index:
+            result = pd.read_sql(sql, index_col='user_id', con=self.__connection)
+        else:
+            result = pd.read_sql(sql, con=self.__connection)
         return result
 
     def main(self,course_name):
@@ -402,3 +413,11 @@ class DataManager():
         org, course, name = course_id.split('/')
         result = modules.find_one({"_id.category": "course", "_id.org": org, "_id.course": course, "_id.name": name})
         return result
+
+    def getStatusForActiveOnCourseUsers(self, course_id):
+        sql = "select au.id as user_id, au.email, IF(c.status = 'downloadable','passed', 'in progress') as status from auth_user au join student_courseenrollment ce on au.id = ce.user_id left join certificates_generatedcertificate c on c.user_id = au.id and ce.course_id = c.course_id where ce.course_id = '{0}'".format(course_id)
+        return pd.read_sql(sql, con=self.__connection, index_col='user_id')
+
+    def getStatusForInactiveOnCourseUsers(self, course_id):
+        sql = "select ce.user_id, au.email, 'just started' as status, 0 as prediction from student_courseenrollment ce join auth_user au on ce.user_id = au.id where  course_id = '{0}' and ce.user_id not in (select student_id from courseware_studentmodule where module_type = 'problem' and course_id = '{0}')".format(course_id)
+        return pd.read_sql(sql, con=self.__connection, index_col='user_id')

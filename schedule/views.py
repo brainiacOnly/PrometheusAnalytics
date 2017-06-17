@@ -4,10 +4,13 @@ from django.template import *
 from django.shortcuts import render_to_response
 from django.core.context_processors import csrf
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from time import time
 from ContentManager import ContentManager
 from article.views import getUserData
 import pandas as pd
+import csv
+import StringIO
 
 @login_required(login_url='/auth/login/')
 def main(request):
@@ -44,5 +47,34 @@ def predict(request):
     args['path'] = request.path
     content = ContentManager(request.session['course'])
     view_name, args['content'] = content.predict()
+    request.session['predict_csv'] = args['content']['predict_csv']
     args['banner'] = {'tilte':u'Прогноз','links':[['/',u'Головна'],['/analysis/predict/',u'Прогноз']]}
     return render_to_response(view_name,args,context_instance=RequestContext(request))
+
+@login_required(login_url='/auth/login/')
+def get_csv(request):
+    data = request.session.get('predict_csv', None)
+    if data is None:
+        data = ['None','None','None']
+    csvfile = newcsv(data, ['email', 'state', 'prediction'])
+
+    response = HttpResponse(csvfile.getvalue(), content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=prediction.csv'
+    return response
+
+
+def newcsv(data, csvheader):
+    """
+    Create a new csv file that represents generated data.
+    """
+    csvrow = []
+    new_csvfile = StringIO.StringIO()
+    wr = csv.writer(new_csvfile)
+    wr.writerow(csvheader)
+    wr = csv.writer(new_csvfile,delimiter=',',)
+
+    for item in data:
+        wr.writerow(item)
+
+    return new_csvfile
+
