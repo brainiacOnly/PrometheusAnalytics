@@ -35,8 +35,8 @@
                                 <td class="col-md-3">{{ row.username }}</td>
                                 <td class="col-md-3">{{ row.email }}</td>
                                 <td class="col-md-3 text-center">
-                                    <a href="#" class="btn btn-success" role="button">Підтвердити</a>
-                                    <a href="#" class="btn btn-danger" role="button">Відхилити</a>
+                                    <a href="/auth/allow_user/{{ row.username }}/" class="btn btn-success" role="button">Підтвердити</a>
+                                    <a href="/auth/deny_user/{{ row.username }}/" class="btn btn-danger" role="button">Відхилити</a>
                                 </td>
                             </tr>
                         {% endfor %}

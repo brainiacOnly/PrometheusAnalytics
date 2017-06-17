@@ -7,6 +7,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.hashers import check_password
 from DataManager import DataManager
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 
 def login(request):
     args={}
@@ -16,7 +17,7 @@ def login(request):
         password = request.POST.get('password','')
         user = auth.authenticate(username=username,password=password)
         if user is not None:
-            if user.last_name != 'True':
+            if user.last_name not in ['Pending', 'Deny']:
                 auth.login(request,user)
             return redirect('/')
         with DataManager() as dm:
@@ -58,7 +59,7 @@ def register(request):
             print 'username exists {0}, email exists {1}'.format(foundUsernames, foundEmails)
             if foundUsernames == 0 and foundEmails == 0:
                 new_user = User.objects.create_user(username, email, password)
-                new_user.last_name = 'True'
+                new_user.last_name = 'Pending'
                 new_user.is_staff = True
                 new_user.save()
             #newuser = auth.authenticate(username=newuser_form.cleaned_data['username'],password=newuser_form.cleaned_data['password2'])
@@ -68,3 +69,19 @@ def register(request):
             print 'form is not valid'
             args['form'] = newuser_form
     return render_to_response('register.html',args)
+
+@login_required(login_url='/auth/login/')
+def allow_user(request, username):
+    if request.user.is_staff:
+        target = User.objects.get(username=username)
+        target.last_name = ''
+        target.save()
+    return redirect('/manage_registration/')
+
+@login_required(login_url='/auth/login/')
+def deny_user(request, username):
+    if request.user.is_staff:
+        target = User.objects.get(username=username)
+        target.last_name = 'Deny'
+        target.save()
+    return redirect('/manage_registration/')

@@ -12,6 +12,7 @@ from bson.objectid import ObjectId
 import itertools
 from Credential import Credential
 from xml.dom import minidom
+from django.contrib.auth.models import User
 
 class DataManager():
     def __enter__(self):
@@ -351,16 +352,20 @@ class DataManager():
         cur = self.__connection.cursor()
         cur.execute("select * from auth_user where username = '%s'" % username)
         auth_user = cur.fetchone()
-        id = auth_user[0]
-        email = auth_user[4]
-        cur.execute("select * from auth_userprofile where user_id = '%d'" % id)
-        auth_userprofile = cur.fetchone()
-        name = auth_userprofile[2]
-        gender = self.map_gender(auth_userprofile[7])
-        year = auth_userprofile[9]
-        education = self.map_educaiton(auth_userprofile[10])
-        aim = auth_userprofile[11]
-        return name,email,gender,year,education,aim
+        if auth_user is not None:
+            id = auth_user[0]
+            email = auth_user[4]
+            cur.execute("select * from auth_userprofile where user_id = '%d'" % id)
+            auth_userprofile = cur.fetchone()
+            name = auth_userprofile[2]
+            gender = self.map_gender(auth_userprofile[7])
+            year = auth_userprofile[9]
+            education = self.map_educaiton(auth_userprofile[10])
+            aim = auth_userprofile[11]
+            return name,email,gender,year,education,aim
+        else:
+            localUser = User.objects.get(username=username)
+            return username, localUser.email, u'Невідомо', u'Невідомо', u'Невідомо', u'Невідомо'
 
     def getAllCourseNames(self):
         credentials = Credential.GetMongoSettings()
@@ -421,3 +426,7 @@ class DataManager():
     def getStatusForInactiveOnCourseUsers(self, course_id):
         sql = "select ce.user_id, au.email, 'just started' as status, 0 as prediction from student_courseenrollment ce join auth_user au on ce.user_id = au.id where  course_id = '{0}' and ce.user_id not in (select student_id from courseware_studentmodule where module_type = 'problem' and course_id = '{0}')".format(course_id)
         return pd.read_sql(sql, con=self.__connection, index_col='user_id')
+
+    def getPendingUsers(self):
+        users = User.objects.filter(last_name='Pending')
+        return map(lambda x: {'username':x.username, 'email':x.email},users)

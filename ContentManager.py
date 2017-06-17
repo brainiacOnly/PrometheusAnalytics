@@ -206,8 +206,8 @@ class ContentManager():
 
     def manage_registration(self):
         content = {'page': u'Управління запитами на раєстрацію'}
-        data = [{'username':'Ivan', 'email':'ivan1322@gmail.com'},{'username':'Olexandr', 'email':'olexa3232@gmail.com'},{'username':'Evgen', 'email':'evgen5959@gmail.com'}]
-        content['data'] = data
+        with DataManager() as dm:
+            content['data'] = dm.getPendingUsers()
         return 'manage_registration.html', content
 
     def schedule(self,id):
