@@ -118,12 +118,15 @@
     {% endif %}
 
     {% block login %} {% endblock %}
+
     {% block body %} {% endblock %}
-    <footer id="footer" class="midnight-blue">
+
+
+    <footer id="footer" class="midnight-blue navbar-fixed-bottom">
         <div class="container">
             <div class="row">
-                <div class="col-sm-6">
-                    &copy; 2013 <a target="_blank" href="http://shapebootstrap.net/" title="Free Twitter Bootstrap WordPress Themes and HTML templates">ShapeBootstrap</a>. All Rights Reserved.
+                <div class="col-sm-6" style="color: white">
+                    &copy; 2017 <a target="_blank" href="http://shapebootstrap.net/" title="Free Twitter Bootstrap WordPress Themes and HTML templates">ShapeBootstrap</a>. All Rights Reserved.
                 </div>
                 <div class="col-sm-6">
                     <ul class="pull-right">
@@ -143,6 +146,10 @@
     <script src="{% static "static/assets/plugins/jquery-2.0.3.min.js" %}"></script>
      <script src="{% static "static/assets/plugins/modernizr-2.6.2-respond-1.1.0.min.js" %}"></script>
     <!-- END GLOBAL SCRIPTS -->
-
+    <script>
+        if($('#main-slider').length){
+            $('body').addClass('midnight-blue');
+        }
+    </script>
 </body>
 </html>
